@@ -1,0 +1,155 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".Controller">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to\nSTM32"
+        android:id="@+id/button_connect"
+        android:onClick="connect_STM32"
+        android:layout_below="@+id/button_connectPi"
+        android:layout_alignLeft="@+id/button_connectPi"
+        android:layout_alignStart="@+id/button_connectPi" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView_data"
+        android:layout_alignBottom="@+id/editText_RPi"
+        android:layout_toLeftOf="@+id/editText_RPi"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to\nRPi"
+        android:id="@+id/button_connectPi"
+        android:onClick="connect_RPi"
+        android:layout_below="@+id/editText_RPi"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_alignParentBottom="true"
+        android:scaleType="fitCenter"
+        android:minWidth="320dp"
+        android:minHeight="240dp"
+        android:background="#CCCCCC" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_RPi"
+        android:text="192.168.1.123"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar_speed"
+        android:layout_above="@+id/button_connectPi"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible"
+        android:max="5"
+        android:progress="0"
+        android:layout_alignRight="@+id/imageView"
+        android:layout_alignEnd="@+id/imageView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speed: 0"
+        android:visibility="invisible"
+        android:id="@+id/textView_speed"
+        android:layout_above="@+id/seekBar_speed"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/seekBar_speed"
+        android:layout_alignEnd="@+id/seekBar_speed" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar_dir"
+        android:visibility="invisible"
+        android:max="8"
+        android:progress="4"
+        android:layout_above="@+id/textView_speed"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/textView_speed"
+        android:layout_alignEnd="@+id/textView_speed" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Direction: 4"
+        android:id="@+id/textView_dir"
+        android:visibility="invisible"
+        android:layout_above="@+id/seekBar_dir"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/seekBar_dir"
+        android:layout_alignEnd="@+id/seekBar_dir" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="M1"
+        android:tag="1"
+        android:id="@+id/button_m1"
+        android:layout_above="@+id/button_m4"
+        android:layout_toLeftOf="@+id/button_m4"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="M2"
+        android:tag="2"
+        android:id="@+id/button_m2"
+        android:layout_above="@+id/button_m1"
+        android:layout_alignLeft="@+id/button_m4" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="M3"
+        android:tag="3"
+        android:id="@+id/button_m3"
+        android:layout_above="@+id/button_m4"
+        android:layout_toRightOf="@+id/button_m2"
+        android:layout_toEndOf="@+id/button_m2" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="M4"
+        android:tag="4"
+        android:id="@+id/button_m4"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="64dp"
+        android:layout_alignParentRight="true"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="light off"
+        android:id="@+id/button_light"
+        android:onClick="light"
+        android:layout_alignBottom="@+id/button_connectPi"
+        android:layout_toLeftOf="@+id/button_connectPi"
+        android:layout_toStartOf="@+id/button_connectPi" />
+
+
+</RelativeLayout>
