@@ -226,13 +226,18 @@ public class Controller extends Activity {
                 recorder.start();
 
 //                FrameRecorder recorder = FrameRecorder.createDefault(file, 320, 240);
-
+                long last = System.currentTimeMillis();
                 for(int i=0;i<125;i++){
                     print(bitmap_display.getWidth()+","+bitmap_display.getHeight());
                     image_now = IplImage.create(bitmap_display.getWidth(), bitmap_display.getHeight(), IPL_DEPTH_8U, 4);
                     bitmap_display.copyPixelsToBuffer(image_now.getByteBuffer());
                     recorder.record(image_now);
-                    SystemClock.sleep(40);
+                    long now = System.currentTimeMillis();
+                    while(now-last<40){
+                        now = System.currentTimeMillis();
+                        SystemClock.sleep(1);
+                    }
+                    last = now;
                 }
 
                 recorder.stop();
@@ -405,7 +410,7 @@ public class Controller extends Activity {
                 while (fail < 10) {
                     boolean success = false;
                     try {
-                        client_RPi = new Socket("192.168.1.66", 8080);
+                        client_RPi = new Socket("10.10.100.123", 8080);
                         client_RPi.setSoTimeout(200);
 //                        client_RPi = new Socket("10.50.255.205", 8080);
                         inputStream_RPi = client_RPi.getInputStream();
