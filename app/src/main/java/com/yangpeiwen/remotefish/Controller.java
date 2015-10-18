@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -30,6 +31,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static com.googlecode.javacv.cpp.opencv_core.*;
+
+import com.googlecode.javacv.cpp.avcodec;
+import com.yangpeiwen.remotefish.util.FFmpegFrameRecorder;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -41,8 +49,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Controller extends Activity {
-    //    compile 'com.android.support:appcompat-v7:22.2.1'
-
     ImageView imageview;
 
     @Override
@@ -182,6 +188,70 @@ public class Controller extends Activity {
         return true;
     }
 
+    public void takephoto(View v){
+        File appDir = new File(Environment.getExternalStorageDirectory(), "BYGD");
+        if (!appDir.exists())appDir.mkdir();
+        String filename = System.currentTimeMillis() + ".jpg";
+        File file = new File(appDir, filename);
+        try{
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap_display.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+
+            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), filename, "BYGD");
+        }catch (Exception ignore){
+
+        }
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
+
+        show("保存成功");
+    }
+
+    Runnable videoRunnable = new Runnable() {
+        @Override
+        public void run() {
+            show("开始摄像");
+            File appDir = new File(Environment.getExternalStorageDirectory(), "BYGD");
+            if (!appDir.exists())appDir.mkdir();
+            String filename = System.currentTimeMillis() + ".mp4";
+            File file = new File(appDir, filename);
+            try{
+                FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(file, 320, 240);
+                recorder.setFrameRate(25);
+                recorder.setVideoCodec(avcodec.AV_CODEC_ID_MPEG4);
+                recorder.setFormat("mp4");
+                recorder.setVideoQuality(0);
+                recorder.setVideoBitrate(96000);
+                recorder.start();
+
+//                FrameRecorder recorder = FrameRecorder.createDefault(file, 320, 240);
+
+                for(int i=0;i<125;i++){
+                    print(bitmap_display.getWidth()+","+bitmap_display.getHeight());
+                    image_now = IplImage.create(bitmap_display.getWidth(), bitmap_display.getHeight(), IPL_DEPTH_8U, 4);
+                    bitmap_display.copyPixelsToBuffer(image_now.getByteBuffer());
+                    recorder.record(image_now);
+                    SystemClock.sleep(40);
+                }
+
+                recorder.stop();
+                recorder.release();
+
+                MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), filename, "BYGD");
+            }catch (Exception ignore){
+
+            }
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
+            show("摄像完成");
+        }
+    };
+
+    public void takevideo(View v){
+        executorService.submit(videoRunnable);
+    }
+
+
     Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -281,11 +351,10 @@ public class Controller extends Activity {
 
     public void connect_STM32(View v) {
         executorService.execute(runnable_connect_STM32);
-        TextView tv = (TextView) findViewById(R.id.textView_data);
         datastring = "连接中";
     }
 
-    String RPi_IP = "192.168.1.123";
+    String RPi_IP = "10.10.100.123";
 
     public void connect_RPi(View v) {
         executorService.execute(runnable_connect_RPi);
@@ -324,7 +393,9 @@ public class Controller extends Activity {
     }
 
     Bitmap bitmap_display;
+    IplImage image_now;
     Runnable runnable_connect_RPi;
+
 
     {
         runnable_connect_RPi = new Runnable() {
@@ -334,7 +405,7 @@ public class Controller extends Activity {
                 while (fail < 10) {
                     boolean success = false;
                     try {
-                        client_RPi = new Socket(RPi_IP, 8080);
+                        client_RPi = new Socket("192.168.1.66", 8080);
                         client_RPi.setSoTimeout(200);
 //                        client_RPi = new Socket("10.50.255.205", 8080);
                         inputStream_RPi = client_RPi.getInputStream();
@@ -349,11 +420,14 @@ public class Controller extends Activity {
                         print("连接成功");
                         try {
                             int bytesRead, current = 0;
+                            byte[] buffer = new byte[1024 * 1024];
                             do {
                                 bytesRead = inputStream_RPi.read(buffer, current, (buffer.length - current));
                                 if (bytesRead >= 0) current += bytesRead;
                             } while (bytesRead > -1);
+
                             bitmap_display = BitmapFactory.decodeByteArray(buffer, 0, current);
+
                             Message message = new Message();
                             message.what = 2;
                             handler.sendMessage(message);
@@ -370,7 +444,19 @@ public class Controller extends Activity {
         };
     }
 
-    byte[] buffer = new byte[1024 * 1024];
+    public void update(View v){
+        executorService.submit(updateRunnable);
+    }
+
+    public void show(String str){
+        showString = str;
+        Message message = new Message();
+        message.what = 3;
+        handler.sendMessage(message);
+    }
+
+    String showString = "";
+    Toast toast;
 
     Handler handler = new Handler() {
         @Override
@@ -384,6 +470,13 @@ public class Controller extends Activity {
                 } else if (msg.what == 2) {
                     BitmapDrawable bd = new BitmapDrawable(bitmap_display);
                     imageview.setBackground(bd);
+                }else if(msg.what == 3){
+                    if (toast == null)
+                        toast = Toast.makeText(getApplicationContext(),
+                                showString, Toast.LENGTH_SHORT);
+                    else
+                        toast.setText(showString);
+                    toast.show();
                 }
             } catch (Exception ignored) {
 
