@@ -6,8 +6,9 @@ package com.yangpeiwen.remotefish;
  */
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -18,25 +19,20 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static com.googlecode.javacv.cpp.opencv_core.*;
-
 import com.googlecode.javacv.cpp.avcodec;
-import com.yangpeiwen.remotefish.util.FFmpegFrameRecorder;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-
+import com.yangpeiwen.remotefish.util.FFmpegFrameRecorder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,22 +41,48 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_8U;
+
 public class Controller extends Activity {
     ImageView imageview;
-
+    TextView joystickTextview;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        if(!Common.isWifiConnected(this)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("需要连接WiFi后才能操控哟~");
+            builder.setPositiveButton("连接WiFi", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+//                    startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+                    startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                }
+            });
+            builder.setNegativeButton("退出", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            builder.create().show();
+        }
+
         //全屏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_controller);
+
         imageview = (ImageView) findViewById(R.id.imageView);
 
         Thread thread = new Thread(new Runnable() {
@@ -77,109 +99,133 @@ public class Controller extends Activity {
         thread.setDaemon(true);
         thread.start();
 
-        SharedPreferences sp = getSharedPreferences("data", 0);
-        EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
-        editText_RPi.setText(sp.getString("IP", "192.168.1.123"));
+//        SharedPreferences sp = getSharedPreferences("data", 0);
+//        EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
+//        editText_RPi.setText(sp.getString("IP", "192.168.1.123"));
+//
+//        SeekBar seekBar_speed = (SeekBar)findViewById(R.id.seekBar_speed);
+//        seekBar_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                print("Speed: " + progress);
+//                command = new byte[1];
+//                command[0] = (byte) (0xC0 + progress);
+//                executorService.execute(runnable_send_stm32);
+//                TextView textView_speed = (TextView) findViewById(R.id.textView_speed);
+//                textView_speed.setText("Speed: " + progress);
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
+//
+//        SeekBar seekBar_dir = (SeekBar)findViewById(R.id.seekBar_dir);
+//        seekBar_dir.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                print("Direction: " + progress);
+//                command = new byte[1];
+//                command[0] = (byte) (0xD0 + progress);
+//                executorService.execute(runnable_send_stm32);
+//                TextView textView_dir = (TextView) findViewById(R.id.textView_dir);
+//                textView_dir.setText("Direction: " + progress);
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
 
-        SeekBar seekBar_speed = (SeekBar)findViewById(R.id.seekBar_speed);
-        seekBar_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        joystickTextview = (TextView)findViewById(R.id.textView_joystick);
+
+        JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
+        joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                print("Speed: " + progress);
-                command = new byte[1];
-                command[0] = (byte) (0xC0 + progress);
-                executorService.execute(runnable_send_stm32);
-                TextView textView_speed = (TextView) findViewById(R.id.textView_speed);
-                textView_speed.setText("Speed: " + progress);
+            public void onValueChanged(int angle, int power, int direction) {
+                String cmd = "c1 c2 c3 " + Integer.toHexString(angle/2) + "\n" + Integer.toHexString(0xD0 + power/10);
+                joystickTextview.setText(angle + "," + power + "\n" + cmd.toUpperCase());
+                nowangle = angle;
+                nowspd = power;
+//                nowspdtime = System.currentTimeMillis();
+//                if (nowspdtime - lastspdtime > 100) {
+//                    if(nowspd != lastspd) {
+//                        lastspdtime = nowspdtime;
+//                        lastspd = nowspd;
+//                        send_one_byte((byte) (0xD0 + nowspd / 10));
+//                    }
+//                }
+//                if(power != lastpower){
+//                    lastpower = power;
+//                    send_one_byte((byte)(0xD0 + power/10));
+//                }
             }
+        }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        SeekBar seekBar_dir = (SeekBar)findViewById(R.id.seekBar_dir);
-        seekBar_dir.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                print("Direction: " + progress);
-                command = new byte[1];
-                command[0] = (byte) (0xD0 + progress);
-                executorService.execute(runnable_send_stm32);
-                TextView textView_dir = (TextView) findViewById(R.id.textView_dir);
-                textView_dir.setText("Direction: " + progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        findViewById(R.id.button_m1).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    cmd1((byte) 0xA1);
-                } else if (action == MotionEvent.ACTION_UP) {
-                    cmd1((byte) 0xB1);
-                }
-                return false;
-            }
-        });
-
-        findViewById(R.id.button_m2).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    cmd1((byte) 0xA2);
-                } else if (action == MotionEvent.ACTION_UP) {
-                    cmd1((byte) 0xB2);
-                }
-                return false;
-            }
-        });
-
-        findViewById(R.id.button_m3).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    cmd1((byte) 0xA3);
-                } else if (action == MotionEvent.ACTION_UP) {
-                    cmd1((byte) 0xB3);
-                }
-                return false;
-            }
-        });
-
-        findViewById(R.id.button_m4).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    cmd1((byte) 0xA4);
-                } else if (action == MotionEvent.ACTION_UP) {
-                    cmd1((byte) 0xB4);
-                }
-                return false;
-            }
-        });
-
+        Thread sendThread = new Thread(sendRunnable);
+        sendThread.setDaemon(true);
+        sendThread.start();
     }
+
+    int nowangle = 0, lastangle = 0;
+    int nowspd = 0, lastspd = 0;
+    long nowtime = 0, lasttime = 0;
+    long nowspdtime = 0, lastspdtime = 0;
+
+    Runnable sendRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while(true){
+                nowtime = System.currentTimeMillis();
+                if(nowtime - lasttime > 100){
+                    if((nowangle != lastangle) | (nowspd != lastspd)){
+                        lastspd = nowspd;
+                        lasttime = nowtime;
+                        lastangle = nowangle;
+                        command = new byte[5];
+                        command[0] = (byte)0xC1;
+                        command[1] = (byte)0xC2;
+                        command[2] = (byte)0xC3;
+                        command[3] = (byte)(nowangle/2);
+                        command[4] = (byte)(0xD0 + nowspd / 10);
+                        executorService.execute(runnable_send_stm32);
+                    }
+                }
+                SystemClock.sleep(10);
+            }
+        }
+    };
+
+    public void up(View v){
+        command = new byte[4];
+        command[0] = (byte)0xC4;
+        command[1] = (byte)0xC5;
+        command[2] = (byte)0xC6;
+        command[3] = (byte)0xBA;
+        executorService.execute(runnable_send_stm32);
+    }
+
+    public void down(View v){
+        command = new byte[4];
+        command[0] = (byte)0xC4;
+        command[1] = (byte)0xC5;
+        command[2] = (byte)0xC6;
+        command[3] = (byte)0xBB;
+        executorService.execute(runnable_send_stm32);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -227,7 +273,7 @@ public class Controller extends Activity {
 
 //                FrameRecorder recorder = FrameRecorder.createDefault(file, 320, 240);
                 long last = System.currentTimeMillis();
-                for(int i=0;i<125;i++){
+                while(taking_video){
                     print(bitmap_display.getWidth()+","+bitmap_display.getHeight());
                     image_now = IplImage.create(bitmap_display.getWidth(), bitmap_display.getHeight(), IPL_DEPTH_8U, 4);
                     bitmap_display.copyPixelsToBuffer(image_now.getByteBuffer());
@@ -245,23 +291,47 @@ public class Controller extends Activity {
 
                 MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), filename, "BYGD");
             }catch (Exception ignore){
-
+                show("摄像失败");
             }
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
             show("摄像完成");
         }
     };
 
+    boolean taking_video = false;
+
     public void takevideo(View v){
-        executorService.submit(videoRunnable);
+        if(taking_video){
+            taking_video = false;
+            ((Button)findViewById(R.id.button_takevideo)).setText("摄像");
+        }else {
+            taking_video = true;
+            ((Button)findViewById(R.id.button_takevideo)).setText("停止摄像");
+            executorService.submit(videoRunnable);
+        }
     }
 
 
     Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
-            print(Environment.getExternalStorageDirectory().toString());
-            File file = new File(Environment.getExternalStorageDirectory() + "/update.apk");
+//            print(Environment.getExternalStorageDirectory().toString());
+//            int vcode = 0;
+//            try {
+//                PackageInfo pi = getPackageManager().getPackageInfo(
+//                        getPackageName(), 0);
+//                System.out.println(pi.versionCode);
+//                vcode = pi.versionCode;
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+
+            Date date = new Date();
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+            String time = format.format(date);
+            String filename = Environment.getExternalStorageDirectory() + "/update_" + time + ".apk";
+            print(filename);
+            File file = new File(filename);
             try{
                 HttpURLConnection conn = (HttpURLConnection)new URL("http://yangpeiwen.com/a.apk")
                         .openConnection();
@@ -322,25 +392,25 @@ public class Controller extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        System.exit(0);
     }
 
     byte[] command;
     int lightstate = 0;
 
     public void light(View v){
-        if(lightstate == 0){
-            lightstate = 1;
-            ((Button)findViewById(R.id.button_light)).setText("light on");
-            cmd1((byte)0xA5);
-        }else{
-            lightstate = 0;
-            ((Button)findViewById(R.id.button_light)).setText("light off");
-            cmd1((byte)0xB5);
-        }
+//        if(lightstate == 0){
+//            lightstate = 1;
+//            ((Button)findViewById(R.id.button_light)).setText("light on");
+//            send_one_byte((byte)0xA5);
+//        }else{
+//            lightstate = 0;
+//            ((Button)findViewById(R.id.button_light)).setText("light off");
+//            send_one_byte((byte)0xB5);
+//        }
+        send_one_byte((byte)0xF0);
     }
 
-    public void cmd1(byte cmd) {
+    public void send_one_byte(byte cmd) {
         command = new byte[1];
         command[0] = cmd;
         executorService.execute(runnable_send_stm32);
@@ -355,19 +425,45 @@ public class Controller extends Activity {
     };
 
     public void connect_STM32(View v) {
+        ip_stm32 = "10.10.100.254";
+        port_stm32 = 8899;
         executorService.execute(runnable_connect_STM32);
         datastring = "连接中";
     }
 
+    public void connect_STM32_2(View v) {
+        ip_stm32 = "10.10.100.124";
+        port_stm32 = 8090;
+        executorService.execute(runnable_connect_STM32);
+        datastring = "连接中";
+    }
+
+
     String RPi_IP = "10.10.100.123";
+    boolean connected_RPi = false;
 
     public void connect_RPi(View v) {
-        executorService.execute(runnable_connect_RPi);
-        SharedPreferences.Editor editor = getSharedPreferences("data", 0).edit();
-        EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
-        RPi_IP = editText_RPi.getText().toString();
-        editor.putString("IP", editText_RPi.getText().toString());
-        editor.apply();
+        if(!connected_RPi) {
+            RPi_IP = "10.10.100.123";
+            executorService.execute(runnable_connect_RPi);
+//            SharedPreferences.Editor editor = getSharedPreferences("data", 0).edit();
+//            EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
+//            RPi_IP = editText_RPi.getText().toString();
+//            editor.putString("IP", editText_RPi.getText().toString());
+//            editor.apply();
+        }
+    }
+
+    public void connect_RPi2(View v) {
+        if(!connected_RPi) {
+            RPi_IP = "10.10.100.124";
+            executorService.execute(runnable_connect_RPi);
+//            SharedPreferences.Editor editor = getSharedPreferences("data", 0).edit();
+//            EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
+//            RPi_IP = editText_RPi.getText().toString();
+//            editor.putString("IP", editText_RPi.getText().toString());
+//            editor.apply();
+        }
     }
 
     String datastring;
@@ -410,7 +506,7 @@ public class Controller extends Activity {
                 while (fail < 10) {
                     boolean success = false;
                     try {
-                        client_RPi = new Socket("10.10.100.123", 8080);
+                        client_RPi = new Socket(RPi_IP, 8080);
                         client_RPi.setSoTimeout(200);
 //                        client_RPi = new Socket("10.50.255.205", 8080);
                         inputStream_RPi = client_RPi.getInputStream();
@@ -422,7 +518,8 @@ public class Controller extends Activity {
 
                     if (success) {
                         fail = 0;
-                        print("连接成功");
+//                        print("连接成功");
+                        connected_RPi = true;
                         try {
                             int bytesRead, current = 0;
                             byte[] buffer = new byte[1024 * 1024];
@@ -445,6 +542,7 @@ public class Controller extends Activity {
                         datastring = "连接失败";
                     }
                 }
+                connected_RPi = false;
             }
         };
     }
@@ -492,11 +590,12 @@ public class Controller extends Activity {
     Socket client_STM32 = null;
     OutputStream outputStream_STM32;
     InputStream inputStream_STM32;
-
+    String ip_stm32 = "10.10.100.254";
+    int port_stm32 = 8899;
     public boolean connect_STM32() {
         boolean f = false;
         try {
-            client_STM32 = new Socket("10.10.100.254", 8899);
+            client_STM32 = new Socket(ip_stm32, port_stm32);
             outputStream_STM32 = client_STM32.getOutputStream();
             inputStream_STM32 = client_STM32.getInputStream();
             f = true;
@@ -521,7 +620,7 @@ public class Controller extends Activity {
             print("发送数据:" + Common.bytesToHexString(buf) + ",长度:" + buf.length);
         } catch (Exception e) {
             e.printStackTrace();
-            datastring = "发送失败";
+            datastring = "发送失败" + Common.bytesToHexString(buf);
             print("错误:" + e.getMessage());
         }
         return f;

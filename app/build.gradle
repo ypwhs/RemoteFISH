@@ -6,14 +6,15 @@ android {
 
     defaultConfig {
         applicationId "com.yangpeiwen.remotefish"
-        minSdkVersion 9
+        minSdkVersion 16
         targetSdkVersion 23
-        versionCode 19
-        versionName "1.0.18.2"
+        versionCode 23
+        versionName "1.1.03"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

@@ -15,13 +15,22 @@
         android:layout_alignLeft="@+id/button_connectPi"
         android:layout_alignStart="@+id/button_connectPi" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to\nSTM32 2"
+        android:id="@+id/button_connect_2"
+        android:onClick="connect_STM32_2"
+        android:layout_below="@+id/button_connectPi"
+        android:layout_toLeftOf="@+id/button_connect" />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView_data"
-        android:layout_alignBottom="@+id/editText_RPi"
-        android:layout_toLeftOf="@+id/editText_RPi"
+        android:text="Data"
+        android:layout_alignParentRight="true"
         />
 
     <Button
@@ -30,7 +39,7 @@
         android:text="Connect to\nRPi"
         android:id="@+id/button_connectPi"
         android:onClick="connect_RPi"
-        android:layout_below="@+id/editText_RPi"
+        android:layout_below="@id/textView_data"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -44,103 +53,13 @@
         android:minHeight="240dp"
         android:background="#CCCCCC" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText_RPi"
-        android:text="192.168.1.123"
-        android:visibility="invisible"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBar_speed"
-        android:layout_above="@+id/button_connectPi"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:visibility="invisible"
-        android:max="5"
-        android:progress="0"
-        android:layout_alignRight="@+id/imageView"
-        android:layout_alignEnd="@+id/imageView" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed: 0"
-        android:visibility="invisible"
-        android:id="@+id/textView_speed"
-        android:layout_above="@+id/seekBar_speed"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/seekBar_speed"
-        android:layout_alignEnd="@+id/seekBar_speed" />
-
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBar_dir"
-        android:visibility="invisible"
-        android:max="8"
-        android:progress="4"
-        android:layout_above="@+id/textView_speed"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/textView_speed"
-        android:layout_alignEnd="@+id/textView_speed" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Direction: 4"
-        android:id="@+id/textView_dir"
-        android:visibility="invisible"
-        android:layout_above="@+id/seekBar_dir"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/seekBar_dir"
-        android:layout_alignEnd="@+id/seekBar_dir" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="M1"
-        android:tag="1"
-        android:id="@+id/button_m1"
-        android:layout_above="@+id/button_m4"
-        android:layout_toLeftOf="@+id/button_m4"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="M2"
-        android:tag="2"
-        android:id="@+id/button_m2"
-        android:layout_above="@+id/button_m1"
-        android:layout_alignLeft="@+id/button_m4" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="M3"
-        android:tag="3"
-        android:id="@+id/button_m3"
-        android:layout_above="@+id/button_m4"
-        android:layout_toRightOf="@+id/button_m2"
-        android:layout_toEndOf="@+id/button_m2" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="M4"
-        android:tag="4"
-        android:id="@+id/button_m4"
+    <com.yangpeiwen.remotefish.JoystickView
+        android:id="@+id/joystickView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="64dp"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignRight="@+id/button_connect"
+        android:layout_alignEnd="@+id/button_connect" />
 
     <Button
         android:layout_width="wrap_content"
@@ -148,9 +67,9 @@
         android:text="light off"
         android:id="@+id/button_light"
         android:onClick="light"
-        android:layout_alignBottom="@+id/button_connectPi"
-        android:layout_toLeftOf="@+id/button_connectPi"
-        android:layout_toStartOf="@+id/button_connectPi" />
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/button_takevideo"
+        android:layout_toEndOf="@+id/button_takevideo" />
 
     <Button
         android:layout_width="wrap_content"
@@ -158,7 +77,6 @@
         android:text="Update"
         android:onClick="update"
         android:id="@+id/button"
-        android:layout_alignBottom="@+id/seekBar_speed"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -168,7 +86,6 @@
         android:text="拍照"
         android:id="@+id/button_takephoto"
         android:onClick="takephoto"
-        android:layout_alignTop="@+id/textView_speed"
         android:layout_toRightOf="@+id/button"
         android:layout_toEndOf="@+id/button" />
 
@@ -181,6 +98,46 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/button_takephoto"
         android:layout_toEndOf="@+id/button_takephoto" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to\nRPi2"
+        android:id="@+id/button_connectPi2"
+        android:onClick="connect_RPi2"
+        android:layout_alignTop="@+id/button_connectPi"
+        android:layout_toLeftOf="@+id/button_connect"
+        android:layout_toStartOf="@+id/button_connect" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:textSize="12sp"
+        android:id="@+id/textView_joystick"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/button_connect"
+        android:layout_alignEnd="@+id/button_connect" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UP"
+        android:id="@+id/button_up"
+        android:onClick="up"
+        android:layout_below="@+id/button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DOWN"
+        android:id="@+id/button_down"
+        android:onClick="down"
+        android:layout_alignTop="@+id/button_up"
+        android:layout_toRightOf="@+id/button_up"
+        android:layout_toEndOf="@+id/button_up" />
 
 
 </RelativeLayout>
