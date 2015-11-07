@@ -182,7 +182,6 @@ public class Controller extends Activity {
     int nowangle = 0, lastangle = 0;
     int nowspd = 0, lastspd = 0;
     long nowtime = 0, lasttime = 0;
-    long nowspdtime = 0, lastspdtime = 0;
 
     Runnable sendRunnable = new Runnable() {
         @Override
@@ -395,7 +394,6 @@ public class Controller extends Activity {
     }
 
     byte[] command;
-    int lightstate = 0;
 
     public void light(View v){
 //        if(lightstate == 0){
@@ -439,31 +437,29 @@ public class Controller extends Activity {
     }
 
 
-    String RPi_IP = "10.10.100.123";
-    boolean connected_RPi = false;
+    String RPi_IP = "192.168.0.128";
 
+    Thread rpi_thread = null;
     public void connect_RPi(View v) {
-        if(!connected_RPi) {
-            RPi_IP = "10.10.100.123";
-            executorService.execute(runnable_connect_RPi);
-//            SharedPreferences.Editor editor = getSharedPreferences("data", 0).edit();
-//            EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
-//            RPi_IP = editText_RPi.getText().toString();
-//            editor.putString("IP", editText_RPi.getText().toString());
-//            editor.apply();
+        if(rpi_thread != null) {
+            rpi_thread.interrupt();
         }
+
+        RPi_IP = "10.10.100.123";
+        rpi_thread = new Thread(runnable_connect_RPi);
+        rpi_thread.setDaemon(true);
+        rpi_thread.start();
     }
 
     public void connect_RPi2(View v) {
-        if(!connected_RPi) {
-            RPi_IP = "10.10.100.124";
-            executorService.execute(runnable_connect_RPi);
-//            SharedPreferences.Editor editor = getSharedPreferences("data", 0).edit();
-//            EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
-//            RPi_IP = editText_RPi.getText().toString();
-//            editor.putString("IP", editText_RPi.getText().toString());
-//            editor.apply();
+        if(rpi_thread != null) {
+            rpi_thread.interrupt();
         }
+
+        RPi_IP = "10.10.100.124";
+        rpi_thread = new Thread(runnable_connect_RPi);
+        rpi_thread.setDaemon(true);
+        rpi_thread.start();
     }
 
     String datastring;
@@ -503,7 +499,7 @@ public class Controller extends Activity {
             @Override
             public void run() {
                 int fail = 0;
-                while (fail < 10) {
+                while (fail < 10 && !Thread.currentThread().isInterrupted()) {
                     boolean success = false;
                     try {
                         client_RPi = new Socket(RPi_IP, 8080);
@@ -519,7 +515,6 @@ public class Controller extends Activity {
                     if (success) {
                         fail = 0;
 //                        print("连接成功");
-                        connected_RPi = true;
                         try {
                             int bytesRead, current = 0;
                             byte[] buffer = new byte[1024 * 1024];
@@ -542,7 +537,6 @@ public class Controller extends Activity {
                         datastring = "连接失败";
                     }
                 }
-                connected_RPi = false;
             }
         };
     }
