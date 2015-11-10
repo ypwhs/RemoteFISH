@@ -422,12 +422,11 @@ public class Controller extends Activity {
     public void connect_RPi(View v) {
         if(raspberryPi != null)
             raspberryPi.stop();
-
 //        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
         raspberryPi = new RaspberryPi("10.10.100.123", 8080);
-        raspberryPi.setOnPictureRecievedListener(new RaspberryPi.OnPictureRecievedListener() {
+        raspberryPi.setOnPictureReceivedListener(new RaspberryPi.OnPictureReceivedListener() {
             @Override
-            public void onPictureRecieved(Bitmap picture) {
+            public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
                 Message message = new Message();
                 message.what = 2;
@@ -442,9 +441,9 @@ public class Controller extends Activity {
 
 //        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
         raspberryPi = new RaspberryPi("10.10.100.124", 8080);
-        raspberryPi.setOnPictureRecievedListener(new RaspberryPi.OnPictureRecievedListener() {
+        raspberryPi.setOnPictureReceivedListener(new RaspberryPi.OnPictureReceivedListener() {
             @Override
-            public void onPictureRecieved(Bitmap picture) {
+            public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
                 Message message = new Message();
                 message.what = 2;

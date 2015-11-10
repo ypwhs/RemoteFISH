@@ -24,7 +24,7 @@ public class RaspberryPi{
                     fail = 0;
                     Bitmap bitmap = readimage();
                     if (bitmap != null) {
-                        onPictureRecievedListener.onPictureRecieved(bitmap);
+                        onPictureReceivedListener.onPictureReceived(bitmap);
                     } else {
                         fail++;
                     }
@@ -84,14 +84,14 @@ public class RaspberryPi{
         return bitmap;
     }
 
-    private OnPictureRecievedListener onPictureRecievedListener;
+    private OnPictureReceivedListener onPictureReceivedListener;
 
-    public interface OnPictureRecievedListener{
-        void onPictureRecieved(Bitmap picture);
+    public interface OnPictureReceivedListener{
+        void onPictureReceived(Bitmap picture);
     }
 
-    public void setOnPictureRecievedListener(OnPictureRecievedListener listener){
-        this.onPictureRecievedListener = listener;
+    public void setOnPictureReceivedListener(OnPictureReceivedListener listener){
+        this.onPictureReceivedListener = listener;
     }
 
     private Queue<byte[]> queue = new LinkedList<>();
