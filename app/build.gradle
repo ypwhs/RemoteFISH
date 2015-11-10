@@ -8,8 +8,9 @@ android {
         applicationId "com.yangpeiwen.remotefish"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 23
-        versionName "1.1.03"
+
+        versionCode 25
+        versionName "1.1.10"
     }
     buildTypes {
         release {
@@ -22,9 +23,5 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
-//    compile group: 'org.bytedeco', name: 'javacv', version: '1.0'
-//    compile group: 'org.bytedeco', name: 'javacpp', version: '1.0'
-//    compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version:'2.4.11–0.11', classifier: 'android-arm'
-//    compile group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version:'2.5.1–0.10', classifier: 'android-arm'
+    compile 'com.android.support:appcompat-v7:23.1.0'
 }

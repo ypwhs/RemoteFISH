@@ -27,6 +27,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,52 +103,46 @@ public class Controller extends Activity {
 //        SharedPreferences sp = getSharedPreferences("data", 0);
 //        EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
 //        editText_RPi.setText(sp.getString("IP", "192.168.1.123"));
-//
-//        SeekBar seekBar_speed = (SeekBar)findViewById(R.id.seekBar_speed);
-//        seekBar_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                print("Speed: " + progress);
-//                command = new byte[1];
-//                command[0] = (byte) (0xC0 + progress);
-//                executorService.execute(runnable_send_stm32);
-//                TextView textView_speed = (TextView) findViewById(R.id.textView_speed);
-//                textView_speed.setText("Speed: " + progress);
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//        });
-//
-//        SeekBar seekBar_dir = (SeekBar)findViewById(R.id.seekBar_dir);
-//        seekBar_dir.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                print("Direction: " + progress);
-//                command = new byte[1];
-//                command[0] = (byte) (0xD0 + progress);
-//                executorService.execute(runnable_send_stm32);
-//                TextView textView_dir = (TextView) findViewById(R.id.textView_dir);
-//                textView_dir.setText("Direction: " + progress);
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//        });
+
+        SeekBar seekBar_x = (SeekBar)findViewById(R.id.seekBar);
+        seekBar_x.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                command = new byte[4];
+                command[0] = (byte)0xC4;
+                command[1] = (byte)0xC5;
+                command[2] = (byte)0xC6;
+                command[3] = (byte)(progress + 0xD0);
+                executorService.execute(runnable_send_stm32);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+
+        });
+
+        SeekBar seekBar_y = (SeekBar)findViewById(R.id.seekBar2);
+        seekBar_y.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                command = new byte[4];
+                command[0] = (byte)0xC4;
+                command[1] = (byte)0xC5;
+                command[2] = (byte)0xC6;
+                command[3] = (byte)(progress + 0xE0);
+                executorService.execute(runnable_send_stm32);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+
+        });
 
         joystickTextview = (TextView)findViewById(R.id.textView_joystick);
 
@@ -159,18 +154,6 @@ public class Controller extends Activity {
                 joystickTextview.setText(angle + "," + power + "\n" + cmd.toUpperCase());
                 nowangle = angle;
                 nowspd = power;
-//                nowspdtime = System.currentTimeMillis();
-//                if (nowspdtime - lastspdtime > 100) {
-//                    if(nowspd != lastspd) {
-//                        lastspdtime = nowspdtime;
-//                        lastspd = nowspd;
-//                        send_one_byte((byte) (0xD0 + nowspd / 10));
-//                    }
-//                }
-//                if(power != lastpower){
-//                    lastpower = power;
-//                    send_one_byte((byte)(0xD0 + power/10));
-//                }
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
@@ -273,7 +256,6 @@ public class Controller extends Activity {
 //                FrameRecorder recorder = FrameRecorder.createDefault(file, 320, 240);
                 long last = System.currentTimeMillis();
                 while(taking_video){
-                    print(bitmap_display.getWidth()+","+bitmap_display.getHeight());
                     image_now = IplImage.create(bitmap_display.getWidth(), bitmap_display.getHeight(), IPL_DEPTH_8U, 4);
                     bitmap_display.copyPixelsToBuffer(image_now.getByteBuffer());
                     recorder.record(image_now);
@@ -314,17 +296,6 @@ public class Controller extends Activity {
     Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
-//            print(Environment.getExternalStorageDirectory().toString());
-//            int vcode = 0;
-//            try {
-//                PackageInfo pi = getPackageManager().getPackageInfo(
-//                        getPackageName(), 0);
-//                System.out.println(pi.versionCode);
-//                vcode = pi.versionCode;
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-
             Date date = new Date();
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             String time = format.format(date);
@@ -422,17 +393,32 @@ public class Controller extends Activity {
         }
     };
 
+    Thread stm32_thread = null;
+
+    String STM32_IP = "10.10.100.254";
     public void connect_STM32(View v) {
-        ip_stm32 = "10.10.100.254";
+        if(stm32_thread!=null) {
+            stm32_thread.interrupt();
+        }
+
+        STM32_IP = "10.10.100.254";
         port_stm32 = 8899;
-        executorService.execute(runnable_connect_STM32);
+        stm32_thread = new Thread(runnable_connect_STM32);
+        stm32_thread.setDaemon(true);
+        stm32_thread.start();
         datastring = "连接中";
     }
 
     public void connect_STM32_2(View v) {
-        ip_stm32 = "10.10.100.124";
+        if(stm32_thread!=null) {
+            stm32_thread.interrupt();
+        }
+        
+        STM32_IP = "10.10.100.124";
         port_stm32 = 8090;
-        executorService.execute(runnable_connect_STM32);
+        stm32_thread = new Thread(runnable_connect_STM32);
+        stm32_thread.setDaemon(true);
+        stm32_thread.start();
         datastring = "连接中";
     }
 
@@ -463,6 +449,7 @@ public class Controller extends Activity {
     }
 
     String datastring;
+
     Runnable runnable_connect_STM32;
 
     {
@@ -473,13 +460,8 @@ public class Controller extends Activity {
                 if (success) {
                     print("连接成功");
                     datastring = "连接成功";
-                    while (true) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         byte[] data = read_STM32();
-//                        try {
-//                            datastring = new String(data, "GBK");
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
                         datastring = Common.bytesToHexString(data);
                     }
                 } else {
@@ -584,12 +566,12 @@ public class Controller extends Activity {
     Socket client_STM32 = null;
     OutputStream outputStream_STM32;
     InputStream inputStream_STM32;
-    String ip_stm32 = "10.10.100.254";
+    
     int port_stm32 = 8899;
     public boolean connect_STM32() {
         boolean f = false;
         try {
-            client_STM32 = new Socket(ip_stm32, port_stm32);
+            client_STM32 = new Socket(STM32_IP, port_stm32);
             outputStream_STM32 = client_STM32.getOutputStream();
             inputStream_STM32 = client_STM32.getInputStream();
             f = true;
@@ -603,7 +585,6 @@ public class Controller extends Activity {
     Socket client_RPi = null;
     InputStream inputStream_RPi;
 
-
     public boolean send_STM32(byte[] buf) {
         boolean f = false;
         try {
@@ -611,11 +592,9 @@ public class Controller extends Activity {
             outputStream_STM32.flush();
             f = true;
             datastring = "发送数据:" + Common.bytesToHexString(buf);
-            print("发送数据:" + Common.bytesToHexString(buf) + ",长度:" + buf.length);
         } catch (Exception e) {
             e.printStackTrace();
-            datastring = "发送失败" + Common.bytesToHexString(buf);
-            print("错误:" + e.getMessage());
+            datastring = "发送失败:" + Common.bytesToHexString(buf);
         }
         return f;
     }
@@ -631,7 +610,6 @@ public class Controller extends Activity {
                 read2[j] = buffer[j];
         } catch (Exception e) {
             e.printStackTrace();
-            print("错误:" + e.getMessage());
         }
         if (read2 != null) {
             print("读到数据:" + Common.bytesToHexString(read2) + ",长度:" + read2.length);

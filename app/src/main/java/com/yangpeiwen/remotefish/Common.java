@@ -35,4 +35,10 @@ public class Common {
         return wifiNetworkInfo.isConnected();
     }
 
+    public static void print(String p) {
+        System.out.println("OUT:" + p);
+        // show(p);
+        // SystemClock.sleep(200);
+    }
+
 }

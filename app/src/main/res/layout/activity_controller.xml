@@ -5,20 +5,28 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".Controller">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect to\nSTM32"
-        android:id="@+id/button_connect"
-        android:onClick="connect_STM32"
-        android:layout_below="@+id/button_connectPi"
-        android:layout_alignLeft="@+id/button_connectPi"
-        android:layout_alignStart="@+id/button_connectPi" />
+    <com.yangpeiwen.remotefish.JoystickView
+        android:id="@+id/joystickView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect to\nSTM32 2"
+        android:text="STM32"
+        android:id="@+id/button_connect"
+        android:onClick="connect_STM32"
+        android:layout_below="@+id/button_connectPi"
+        android:layout_alignRight="@+id/button_connectPi"
+        android:layout_alignEnd="@+id/button_connectPi" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STM32 2"
         android:id="@+id/button_connect_2"
         android:onClick="connect_STM32_2"
         android:layout_below="@+id/button_connectPi"
@@ -31,15 +39,17 @@
         android:id="@+id/textView_data"
         android:text="Data"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/button_connect"
         />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:text="Connect to\nRPi"
+        android:text="RPi 1"
         android:id="@+id/button_connectPi"
         android:onClick="connect_RPi"
-        android:layout_below="@id/textView_data"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -49,17 +59,11 @@
         android:id="@+id/imageView"
         android:layout_alignParentBottom="true"
         android:scaleType="fitCenter"
-        android:minWidth="320dp"
-        android:minHeight="240dp"
+        android:minWidth="280dp"
+        android:minHeight="210dp"
         android:background="#CCCCCC" />
 
-    <com.yangpeiwen.remotefish.JoystickView
-        android:id="@+id/joystickView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/button_connect"
-        android:layout_alignEnd="@+id/button_connect" />
+
 
     <Button
         android:layout_width="wrap_content"
@@ -102,12 +106,12 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect to\nRPi2"
+        android:text="RPi 2"
         android:id="@+id/button_connectPi2"
         android:onClick="connect_RPi2"
         android:layout_alignTop="@+id/button_connectPi"
-        android:layout_toLeftOf="@+id/button_connect"
-        android:layout_toStartOf="@+id/button_connect" />
+        android:layout_toLeftOf="@+id/button_connectPi"
+        android:layout_toStartOf="@+id/button_connectPi" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -138,6 +142,28 @@
         android:layout_alignTop="@+id/button_up"
         android:layout_toRightOf="@+id/button_up"
         android:layout_toEndOf="@+id/button_up" />
+
+    <SeekBar
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:max="10"
+        android:progress="0"
+        android:layout_alignBottom="@+id/button_down"
+        android:layout_toRightOf="@+id/button_down"
+        android:layout_toEndOf="@+id/button_down"
+        android:indeterminate="false" />
+
+    <SeekBar
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar2"
+        android:max="10"
+        android:progress="0"
+        android:indeterminate="false"
+        android:layout_alignTop="@+id/seekBar"
+        android:layout_toRightOf="@+id/seekBar"
+        android:layout_toEndOf="@+id/seekBar" />
 
 
 </RelativeLayout>
