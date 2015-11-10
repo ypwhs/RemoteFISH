@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,8 +51,10 @@ import java.util.concurrent.Executors;
 import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_8U;
 
 public class Controller extends Activity {
+
     ImageView imageview;
     TextView joystickTextview;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +87,7 @@ public class Controller extends Activity {
 
         imageview = (ImageView) findViewById(R.id.imageView);
 
+        //更新datastring
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -99,10 +101,6 @@ public class Controller extends Activity {
         });
         thread.setDaemon(true);
         thread.start();
-
-//        SharedPreferences sp = getSharedPreferences("data", 0);
-//        EditText editText_RPi = (EditText) findViewById(R.id.editText_RPi);
-//        editText_RPi.setText(sp.getString("IP", "192.168.1.123"));
 
         SeekBar seekBar_x = (SeekBar)findViewById(R.id.seekBar);
         seekBar_x.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -157,7 +155,7 @@ public class Controller extends Activity {
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
-        Thread sendThread = new Thread(sendRunnable);
+        Thread sendThread = new Thread(joystickSendRunnable);
         sendThread.setDaemon(true);
         sendThread.start();
     }
@@ -166,7 +164,7 @@ public class Controller extends Activity {
     int nowspd = 0, lastspd = 0;
     long nowtime = 0, lasttime = 0;
 
-    Runnable sendRunnable = new Runnable() {
+    Runnable joystickSendRunnable = new Runnable() {
         @Override
         public void run() {
             while(true){
@@ -207,7 +205,6 @@ public class Controller extends Activity {
         command[3] = (byte)0xBB;
         executorService.execute(runnable_send_stm32);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -310,8 +307,7 @@ public class Controller extends Activity {
                 byte[] buf = new byte[256];
                 conn.connect();
                 if (conn.getResponseCode() >= 400) {
-                    Toast.makeText(Controller.this, "连接超时", Toast.LENGTH_SHORT)
-                            .show();
+                    show("连接超时");
                 } else {
                     while (true) {
                         if (is != null) {
@@ -422,34 +418,42 @@ public class Controller extends Activity {
         datastring = "连接中";
     }
 
-
-    String RPi_IP = "192.168.0.128";
-
-    Thread rpi_thread = null;
+    RaspberryPi raspberryPi = null;
     public void connect_RPi(View v) {
-        if(rpi_thread != null) {
-            rpi_thread.interrupt();
-        }
+        if(raspberryPi != null)
+            raspberryPi.stop();
 
-        RPi_IP = "10.10.100.123";
-        rpi_thread = new Thread(runnable_connect_RPi);
-        rpi_thread.setDaemon(true);
-        rpi_thread.start();
+//        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
+        raspberryPi = new RaspberryPi("10.10.100.123", 8080);
+        raspberryPi.setOnPictureRecievedListener(new RaspberryPi.OnPictureRecievedListener() {
+            @Override
+            public void onPictureRecieved(Bitmap picture) {
+                bitmap_display = picture;
+                Message message = new Message();
+                message.what = 2;
+                handler.sendMessage(message);
+            }
+        });
     }
 
     public void connect_RPi2(View v) {
-        if(rpi_thread != null) {
-            rpi_thread.interrupt();
-        }
+        if(raspberryPi != null)
+            raspberryPi.stop();
 
-        RPi_IP = "10.10.100.124";
-        rpi_thread = new Thread(runnable_connect_RPi);
-        rpi_thread.setDaemon(true);
-        rpi_thread.start();
+//        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
+        raspberryPi = new RaspberryPi("10.10.100.124", 8080);
+        raspberryPi.setOnPictureRecievedListener(new RaspberryPi.OnPictureRecievedListener() {
+            @Override
+            public void onPictureRecieved(Bitmap picture) {
+                bitmap_display = picture;
+                Message message = new Message();
+                message.what = 2;
+                handler.sendMessage(message);
+            }
+        });
     }
 
     String datastring;
-
     Runnable runnable_connect_STM32;
 
     {
@@ -473,55 +477,6 @@ public class Controller extends Activity {
 
     Bitmap bitmap_display;
     IplImage image_now;
-    Runnable runnable_connect_RPi;
-
-
-    {
-        runnable_connect_RPi = new Runnable() {
-            @Override
-            public void run() {
-                int fail = 0;
-                while (fail < 10 && !Thread.currentThread().isInterrupted()) {
-                    boolean success = false;
-                    try {
-                        client_RPi = new Socket(RPi_IP, 8080);
-                        client_RPi.setSoTimeout(200);
-//                        client_RPi = new Socket("10.50.255.205", 8080);
-                        inputStream_RPi = client_RPi.getInputStream();
-                        success = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        print("错误:" + e.getMessage());
-                    }
-
-                    if (success) {
-                        fail = 0;
-//                        print("连接成功");
-                        try {
-                            int bytesRead, current = 0;
-                            byte[] buffer = new byte[1024 * 1024];
-                            do {
-                                bytesRead = inputStream_RPi.read(buffer, current, (buffer.length - current));
-                                if (bytesRead >= 0) current += bytesRead;
-                            } while (bytesRead > -1);
-
-                            bitmap_display = BitmapFactory.decodeByteArray(buffer, 0, current);
-
-                            Message message = new Message();
-                            message.what = 2;
-                            handler.sendMessage(message);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        fail++;
-                        print("连接失败");
-                        datastring = "连接失败";
-                    }
-                }
-            }
-        };
-    }
 
     public void update(View v){
         executorService.submit(updateRunnable);
@@ -582,8 +537,11 @@ public class Controller extends Activity {
         return f;
     }
 
-    Socket client_RPi = null;
-    InputStream inputStream_RPi;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.exit(0);
+    }
 
     public boolean send_STM32(byte[] buf) {
         boolean f = false;
@@ -593,7 +551,7 @@ public class Controller extends Activity {
             f = true;
             datastring = "发送数据:" + Common.bytesToHexString(buf);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             datastring = "发送失败:" + Common.bytesToHexString(buf);
         }
         return f;

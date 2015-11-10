@@ -3,6 +3,7 @@
 	JoystickView by AJ Alves is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License.
 	Based on a work at github.com and page zerokol.com/2012/03/joystickview-uma-view-customizada-que.html.
 	Permissions beyond the scope of this license may be available at http://github.com/zerokol.
+	Modified by yangpeiwen.
  */
 
 package com.yangpeiwen.remotefish;
@@ -18,14 +19,6 @@ import android.view.View;
 public class JoystickView extends View implements Runnable {
 
 	public final static long DEFAULT_LOOP_INTERVAL = 40; // 40 ms
-	public final static int FRONT = 3;
-	public final static int FRONT_RIGHT = 2;
-	public final static int RIGHT = 1;
-	public final static int RIGHT_BOTTOM = 8;
-	public final static int BOTTOM = 7;
-	public final static int BOTTOM_LEFT = 6;
-	public final static int LEFT = 5;
-	public final static int LEFT_FRONT = 4;
 
 	// Variables
 	private OnJoystickMoveListener onJoystickMoveListener; // Listener
@@ -44,20 +37,15 @@ public class JoystickView extends View implements Runnable {
 		super(context);
 	}
 
-	public JoystickView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-//		initJoystickView();
-	}
+	public JoystickView(Context context, AttributeSet attrs) { super(context, attrs); }
 
 	public JoystickView(Context context, AttributeSet attrs, int defaultStyle) {
 		super(context, attrs, defaultStyle);
-//		initJoystickView();
 	}
 
 	@Override
 	protected void onSizeChanged(int xNew, int yNew, int xOld, int yOld) {
 		super.onSizeChanged(xNew, yNew, xOld, yOld);
-		// before measure, get the center of view
 		xPosition = getWidth() / 2;
 		yPosition = getWidth() / 2;
 		int d = Math.min(xNew, yNew);
@@ -68,12 +56,8 @@ public class JoystickView extends View implements Runnable {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// setting the measured values to resize the view to a certain width and
-		// height
 		int d = Math.min(measure(widthMeasureSpec), measure(heightMeasureSpec));
-
 		setMeasuredDimension(d, d);
-
 	}
 
 	private int measure(int measureSpec) {
