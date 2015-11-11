@@ -8,7 +8,9 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Remote FISH"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:animateLayoutChanges="true"
+        >
         <activity
             android:name=".Controller"
             android:screenOrientation="landscape"

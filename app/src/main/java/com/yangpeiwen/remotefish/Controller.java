@@ -445,6 +445,7 @@ public class Controller extends Activity {
             @Override
             public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
+                //收到图片，通知handler更新UI
                 Message message = new Message();
                 message.what = 2;
                 handler.sendMessage(message);
