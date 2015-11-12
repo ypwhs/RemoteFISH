@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.googlecode.javacv.cpp.avcodec;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.yangpeiwen.remotefish.connector.RaspberryPiConnector;
 import com.yangpeiwen.remotefish.util.FFmpegFrameRecorder;
 
 import java.io.File;
@@ -355,23 +356,9 @@ public class Controller extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
     byte[] command;
 
     public void light(View v){
-//        if(lightstate == 0){
-//            lightstate = 1;
-//            ((Button)findViewById(R.id.button_light)).setText("light on");
-//            send_one_byte((byte)0xA5);
-//        }else{
-//            lightstate = 0;
-//            ((Button)findViewById(R.id.button_light)).setText("light off");
-//            send_one_byte((byte)0xB5);
-//        }
         send_one_byte((byte)0xF0);
     }
 
@@ -418,13 +405,13 @@ public class Controller extends Activity {
         datastring = "连接中";
     }
 
-    RaspberryPi raspberryPi = null;
+    RaspberryPiConnector raspberryPiConnector = null;
     public void connect_RPi(View v) {
-        if(raspberryPi != null)
-            raspberryPi.stop();
-//        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
-        raspberryPi = new RaspberryPi("10.10.100.123", 8080);
-        raspberryPi.setOnPictureReceivedListener(new RaspberryPi.OnPictureReceivedListener() {
+        if(raspberryPiConnector != null)
+            raspberryPiConnector.stop();
+//        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
+        raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
@@ -436,12 +423,12 @@ public class Controller extends Activity {
     }
 
     public void connect_RPi2(View v) {
-        if(raspberryPi != null)
-            raspberryPi.stop();
+        if(raspberryPiConnector != null)
+            raspberryPiConnector.stop();
 
-//        raspberryPi = new RaspberryPi("192.168.0.128", 8080);
-        raspberryPi = new RaspberryPi("10.10.100.124", 8080);
-        raspberryPi.setOnPictureReceivedListener(new RaspberryPi.OnPictureReceivedListener() {
+//        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("10.10.100.124", 8080);
+        raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
@@ -454,26 +441,22 @@ public class Controller extends Activity {
     }
 
     String datastring;
-    Runnable runnable_connect_STM32;
-
-    {
-        runnable_connect_STM32 = new Runnable() {
-            @Override
-            public void run() {
-                boolean success = connect_STM32();
-                if (success) {
-                    print("连接成功");
-                    datastring = "连接成功";
-                    while (!Thread.currentThread().isInterrupted()) {
-                        byte[] data = read_STM32();
-                        datastring = Common.bytesToHexString(data);
-                    }
-                } else {
-                    print("连接失败");
+    Runnable runnable_connect_STM32 = new Runnable() {
+        @Override
+        public void run() {
+            boolean success = connect_STM32();
+            if (success) {
+                print("连接成功");
+                datastring = "连接成功";
+                while (!Thread.currentThread().isInterrupted()) {
+                    byte[] data = read_STM32();
+                    datastring = Common.bytesToHexString(data);
                 }
+            } else {
+                print("连接失败");
             }
-        };
-    }
+        }
+    };
 
     Bitmap bitmap_display;
     IplImage image_now;
