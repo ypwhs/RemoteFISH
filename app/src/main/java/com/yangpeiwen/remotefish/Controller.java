@@ -149,8 +149,13 @@ public class Controller extends Activity {
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                String cmd = "c1 c2 c3 " + Integer.toHexString(angle/2) + "\n" + Integer.toHexString(0xD0 + power/10);
-                joystickTextview.setText(angle + "," + power + "\n" + cmd.toUpperCase());
+                byte[] cmd = new byte[5];
+                cmd[0] = (byte)0xC1;
+                cmd[1] = (byte)0xC2;
+                cmd[2] = (byte)0xC3;
+                cmd[3] = (byte)(angle/10);
+                cmd[4] = (byte)(0xD0 + power / 10);
+                joystickTextview.setText(angle + "," + power + "\n" + Common.bytesToHexString(cmd));
                 nowangle = angle;
                 nowspd = power;
             }
@@ -179,7 +184,7 @@ public class Controller extends Activity {
                         command[0] = (byte)0xC1;
                         command[1] = (byte)0xC2;
                         command[2] = (byte)0xC3;
-                        command[3] = (byte)(nowangle/2);
+                        command[3] = (byte)(nowangle/10);
                         command[4] = (byte)(0xD0 + nowspd / 10);
                         executorService.execute(runnable_send_stm32);
                     }
