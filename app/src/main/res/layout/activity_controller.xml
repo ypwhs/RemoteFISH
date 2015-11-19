@@ -9,6 +9,7 @@
         android:id="@+id/joystickView"
         android:layout_width="200dp"
         android:layout_height="200dp"
+        android:visibility="invisible"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
@@ -16,7 +17,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="STM32"
+        android:text="开机"
         android:id="@+id/button_connect"
         android:onClick="connect_STM32"
         android:layout_below="@+id/button_connectPi"
@@ -27,6 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="STM32 2"
+        android:visibility="invisible"
         android:id="@+id/button_connect_2"
         android:onClick="connect_STM32_2"
         android:layout_below="@+id/button_connectPi"
@@ -37,16 +39,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView_data"
-        android:text="Data"
+        android:text=""
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/button_connect"
         />
 
     <Button
-        android:layout_width="80dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:text="RPi 1"
+        android:text="打开摄像头"
         android:id="@+id/button_connectPi"
         android:onClick="connect_RPi"
         android:layout_alignParentTop="true"
@@ -68,7 +70,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="light off"
+        android:text="开灯"
         android:id="@+id/button_light"
         android:onClick="light"
         android:layout_alignParentTop="true"
@@ -79,6 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Update"
+        android:visibility="invisible"
         android:onClick="update"
         android:id="@+id/button"
         android:layout_alignParentLeft="true"
@@ -89,9 +92,7 @@
         android:layout_height="wrap_content"
         android:text="拍照"
         android:id="@+id/button_takephoto"
-        android:onClick="takephoto"
-        android:layout_toRightOf="@+id/button"
-        android:layout_toEndOf="@+id/button" />
+        android:onClick="takephoto" />
 
     <Button
         android:layout_width="wrap_content"
@@ -107,6 +108,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="RPi 2"
+        android:visibility="invisible"
         android:id="@+id/button_connectPi2"
         android:onClick="connect_RPi2"
         android:layout_alignTop="@+id/button_connectPi"
@@ -116,7 +118,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
+        android:text=""
         android:textSize="12sp"
         android:id="@+id/textView_joystick"
         android:layout_alignParentBottom="true"
@@ -127,6 +129,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="UP"
+        android:visibility="invisible"
         android:id="@+id/button_up"
         android:onClick="up"
         android:layout_below="@+id/button"
@@ -137,6 +140,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="DOWN"
+        android:visibility="invisible"
         android:id="@+id/button_down"
         android:onClick="down"
         android:layout_alignTop="@+id/button_up"
@@ -148,6 +152,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/seekBar"
         android:max="10"
+        android:visibility="invisible"
         android:progress="0"
         android:layout_alignBottom="@+id/button_down"
         android:layout_toRightOf="@+id/button_down"
@@ -160,10 +165,48 @@
         android:id="@+id/seekBar2"
         android:max="10"
         android:progress="0"
+        android:visibility="invisible"
         android:indeterminate="false"
         android:layout_alignTop="@+id/seekBar"
         android:layout_toRightOf="@+id/seekBar"
         android:layout_toEndOf="@+id/seekBar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="右"
+        android:id="@+id/button_d"
+        android:layout_above="@+id/button_s"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+         />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="后"
+        android:id="@+id/button_s"
+        android:layout_above="@+id/textView_joystick"
+        android:layout_toLeftOf="@+id/button_d"
+        android:layout_toStartOf="@+id/textView_joystick" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="左"
+        android:id="@+id/button_a"
+        android:layout_above="@+id/button_s"
+        android:layout_toLeftOf="@+id/button_s"
+        android:layout_toStartOf="@+id/button_s" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="前"
+        android:id="@+id/button_w"
+        android:layout_above="@+id/button_a"
+        android:layout_alignLeft="@+id/button_s"
+        android:layout_alignStart="@+id/button_s" />
 
 
 </RelativeLayout>

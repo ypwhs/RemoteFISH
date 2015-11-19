@@ -19,8 +19,10 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -164,6 +166,106 @@ public class Controller extends Activity {
         Thread sendThread = new Thread(joystickSendRunnable);
         sendThread.setDaemon(true);
         sendThread.start();
+
+        findViewById(R.id.button_w).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                if (action == KeyEvent.ACTION_DOWN) {
+                    command = new byte[5];
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (0 / 10);
+                    command[4] = (byte) (0xDA);
+                    executorService.execute(runnable_send_stm32);
+                } else if (action == KeyEvent.ACTION_UP) {
+                    command = new byte[5];
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (0 / 10);
+                    command[4] = (byte) (0xD0);
+                    executorService.execute(runnable_send_stm32);
+                }
+                return false;
+            }
+        });
+
+        findViewById(R.id.button_d).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                if(action == KeyEvent.ACTION_DOWN){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(90/10);
+                    command[4] = (byte)(0xDA);
+                    executorService.execute(runnable_send_stm32);
+                }else if(action == KeyEvent.ACTION_UP){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(0/10);
+                    command[4] = (byte)(0xD0);
+                    executorService.execute(runnable_send_stm32);
+                }
+                return false;
+            }
+        });
+        findViewById(R.id.button_s).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                if(action == KeyEvent.ACTION_DOWN){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(180/10);
+                    command[4] = (byte)(0xDA);
+                    executorService.execute(runnable_send_stm32);
+                }else if(action == KeyEvent.ACTION_UP){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(0/10);
+                    command[4] = (byte)(0xD0);
+                    executorService.execute(runnable_send_stm32);
+                }
+                return false;
+            }
+        });
+        findViewById(R.id.button_a).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                if(action == KeyEvent.ACTION_DOWN){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(270/10);
+                    command[4] = (byte)(0xDA);
+                    executorService.execute(runnable_send_stm32);
+                }else if(action == KeyEvent.ACTION_UP){
+                    command = new byte[5];
+                    command[0] = (byte)0xC1;
+                    command[1] = (byte)0xC2;
+                    command[2] = (byte)0xC3;
+                    command[3] = (byte)(0/10);
+                    command[4] = (byte)(0xD0);
+                    executorService.execute(runnable_send_stm32);
+                }
+                return false;
+            }
+        });
+
+
     }
 
     int nowangle = 0, lastangle = 0;
