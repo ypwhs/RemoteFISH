@@ -57,13 +57,14 @@ public class Controller extends Activity {
 
     ImageView imageview;
     TextView joystickTextview;
+    Thread refreshString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        if(!Common.isWifiConnected(this)){
+        if (!Common.isWifiConnected(this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("需要连接WiFi后才能操控哟~");
             builder.setPositiveButton("连接WiFi", new DialogInterface.OnClickListener() {
@@ -91,10 +92,10 @@ public class Controller extends Activity {
         imageview = (ImageView) findViewById(R.id.imageView);
 
         //更新datastring
-        Thread thread = new Thread(new Runnable() {
+        refreshString = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(true) {
+                for (; ; ) {
                     Message message = new Message();
                     message.what = 1;
                     handler.sendMessage(message);
@@ -102,68 +103,94 @@ public class Controller extends Activity {
                 }
             }
         });
-        thread.setDaemon(true);
-        thread.start();
+        refreshString.setDaemon(true);
+        refreshString.start();
 
-        SeekBar seekBar_x = (SeekBar)findViewById(R.id.seekBar);
+        SeekBar seekBar_x = (SeekBar) findViewById(R.id.seekBar);
         seekBar_x.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 command = new byte[4];
-                command[0] = (byte)0xC4;
-                command[1] = (byte)0xC5;
-                command[2] = (byte)0xC6;
-                command[3] = (byte)(progress + 0xD0);
+                command[0] = (byte) 0xC4;
+                command[1] = (byte) 0xC5;
+                command[2] = (byte) 0xC6;
+                command[3] = (byte) (progress + 0xD0);
                 executorService.execute(runnable_send_stm32);
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
 
         });
 
-        SeekBar seekBar_y = (SeekBar)findViewById(R.id.seekBar2);
+        SeekBar seekBar_y = (SeekBar) findViewById(R.id.seekBar2);
         seekBar_y.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 command = new byte[4];
-                command[0] = (byte)0xC4;
-                command[1] = (byte)0xC5;
-                command[2] = (byte)0xC6;
-                command[3] = (byte)(progress + 0xE0);
+                command[0] = (byte) 0xC4;
+                command[1] = (byte) 0xC5;
+                command[2] = (byte) 0xC6;
+                command[3] = (byte) (progress + 0xE0);
                 executorService.execute(runnable_send_stm32);
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
 
         });
 
-        joystickTextview = (TextView)findViewById(R.id.textView_joystick);
+        joystickTextview = (TextView) findViewById(R.id.textView_joystick);
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
                 byte[] cmd = new byte[5];
-                cmd[0] = (byte)0xC1;
-                cmd[1] = (byte)0xC2;
-                cmd[2] = (byte)0xC3;
-                cmd[3] = (byte)(angle/10);
-                cmd[4] = (byte)(0xD0 + power / 10);
+                cmd[0] = (byte) 0xC1;
+                cmd[1] = (byte) 0xC2;
+                cmd[2] = (byte) 0xC3;
+                cmd[3] = (byte) (angle / 10);
+                cmd[4] = (byte) (0xD0 + power / 10);
                 joystickTextview.setText(angle + "," + power + "\n" + Common.bytesToHexString(cmd));
                 nowangle = angle;
                 nowspd = power;
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
-        Thread sendThread = new Thread(joystickSendRunnable);
+        Thread sendThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (; ; ) {
+                    nowtime = System.currentTimeMillis();
+                    if (nowtime - lasttime > 100) {
+                        if ((nowangle != lastangle) | (nowspd != lastspd)) {
+                            lastspd = nowspd;
+                            lasttime = nowtime;
+                            lastangle = nowangle;
+                            command = new byte[5];
+                            command[0] = (byte) 0xC1;
+                            command[1] = (byte) 0xC2;
+                            command[2] = (byte) 0xC3;
+                            command[3] = (byte) (nowangle / 10);
+                            command[4] = (byte) (0xD0 + nowspd / 10);
+                            executorService.execute(runnable_send_stm32);
+                        }
+                    }
+                    SystemClock.sleep(10);
+                }
+            }
+        });
         sendThread.setDaemon(true);
         sendThread.start();
 
@@ -196,21 +223,21 @@ public class Controller extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                if(action == KeyEvent.ACTION_DOWN){
+                if (action == KeyEvent.ACTION_DOWN) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(90/10);
-                    command[4] = (byte)(0xDA);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (90 / 10);
+                    command[4] = (byte) (0xDA);
                     executorService.execute(runnable_send_stm32);
-                }else if(action == KeyEvent.ACTION_UP){
+                } else if (action == KeyEvent.ACTION_UP) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(0/10);
-                    command[4] = (byte)(0xD0);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (0 / 10);
+                    command[4] = (byte) (0xD0);
                     executorService.execute(runnable_send_stm32);
                 }
                 return false;
@@ -220,21 +247,21 @@ public class Controller extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                if(action == KeyEvent.ACTION_DOWN){
+                if (action == KeyEvent.ACTION_DOWN) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(180/10);
-                    command[4] = (byte)(0xDA);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (180 / 10);
+                    command[4] = (byte) (0xDA);
                     executorService.execute(runnable_send_stm32);
-                }else if(action == KeyEvent.ACTION_UP){
+                } else if (action == KeyEvent.ACTION_UP) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(0/10);
-                    command[4] = (byte)(0xD0);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (0 / 10);
+                    command[4] = (byte) (0xD0);
                     executorService.execute(runnable_send_stm32);
                 }
                 return false;
@@ -244,21 +271,21 @@ public class Controller extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                if(action == KeyEvent.ACTION_DOWN){
+                if (action == KeyEvent.ACTION_DOWN) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(270/10);
-                    command[4] = (byte)(0xDA);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (270 / 10);
+                    command[4] = (byte) (0xDA);
                     executorService.execute(runnable_send_stm32);
-                }else if(action == KeyEvent.ACTION_UP){
+                } else if (action == KeyEvent.ACTION_UP) {
                     command = new byte[5];
-                    command[0] = (byte)0xC1;
-                    command[1] = (byte)0xC2;
-                    command[2] = (byte)0xC3;
-                    command[3] = (byte)(0/10);
-                    command[4] = (byte)(0xD0);
+                    command[0] = (byte) 0xC1;
+                    command[1] = (byte) 0xC2;
+                    command[2] = (byte) 0xC3;
+                    command[3] = (byte) (0 / 10);
+                    command[4] = (byte) (0xD0);
                     executorService.execute(runnable_send_stm32);
                 }
                 return false;
@@ -272,45 +299,21 @@ public class Controller extends Activity {
     int nowspd = 0, lastspd = 0;
     long nowtime = 0, lasttime = 0;
 
-    Runnable joystickSendRunnable = new Runnable() {
-        @Override
-        public void run() {
-            while(true){
-                nowtime = System.currentTimeMillis();
-                if(nowtime - lasttime > 100){
-                    if((nowangle != lastangle) | (nowspd != lastspd)){
-                        lastspd = nowspd;
-                        lasttime = nowtime;
-                        lastangle = nowangle;
-                        command = new byte[5];
-                        command[0] = (byte)0xC1;
-                        command[1] = (byte)0xC2;
-                        command[2] = (byte)0xC3;
-                        command[3] = (byte)(nowangle/10);
-                        command[4] = (byte)(0xD0 + nowspd / 10);
-                        executorService.execute(runnable_send_stm32);
-                    }
-                }
-                SystemClock.sleep(10);
-            }
-        }
-    };
-
-    public void up(View v){
+    public void up(View v) {
         command = new byte[4];
-        command[0] = (byte)0xC4;
-        command[1] = (byte)0xC5;
-        command[2] = (byte)0xC6;
-        command[3] = (byte)0xBA;
+        command[0] = (byte) 0xC4;
+        command[1] = (byte) 0xC5;
+        command[2] = (byte) 0xC6;
+        command[3] = (byte) 0xBA;
         executorService.execute(runnable_send_stm32);
     }
 
-    public void down(View v){
+    public void down(View v) {
         command = new byte[4];
-        command[0] = (byte)0xC4;
-        command[1] = (byte)0xC5;
-        command[2] = (byte)0xC6;
-        command[3] = (byte)0xBB;
+        command[0] = (byte) 0xC4;
+        command[1] = (byte) 0xC5;
+        command[2] = (byte) 0xC6;
+        command[3] = (byte) 0xBB;
         executorService.execute(runnable_send_stm32);
     }
 
@@ -321,19 +324,19 @@ public class Controller extends Activity {
         return true;
     }
 
-    public void takephoto(View v){
+    public void takephoto(View v) {
         File appDir = new File(Environment.getExternalStorageDirectory(), "BYGD");
-        if (!appDir.exists())appDir.mkdir();
+        if (!appDir.exists()) appDir.mkdir();
         String filename = System.currentTimeMillis() + ".jpg";
         File file = new File(appDir, filename);
-        try{
+        try {
             FileOutputStream fos = new FileOutputStream(file);
             bitmap_display.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();
 
             MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), filename, "BYGD");
-        }catch (Exception ignore){
+        } catch (Exception ignore) {
 
         }
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
@@ -346,10 +349,10 @@ public class Controller extends Activity {
         public void run() {
             show("开始摄像");
             File appDir = new File(Environment.getExternalStorageDirectory(), "BYGD");
-            if (!appDir.exists())appDir.mkdir();
+            if (!appDir.exists()) appDir.mkdir();
             String filename = System.currentTimeMillis() + ".mp4";
             File file = new File(appDir, filename);
-            try{
+            try {
                 FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(file, 320, 240);
                 recorder.setFrameRate(25);
                 recorder.setVideoCodec(avcodec.AV_CODEC_ID_MPEG4);
@@ -360,12 +363,12 @@ public class Controller extends Activity {
 
 //                FrameRecorder recorder = FrameRecorder.createDefault(file, 320, 240);
                 long last = System.currentTimeMillis();
-                while(taking_video){
+                while (taking_video) {
                     image_now = IplImage.create(bitmap_display.getWidth(), bitmap_display.getHeight(), IPL_DEPTH_8U, 4);
                     bitmap_display.copyPixelsToBuffer(image_now.getByteBuffer());
                     recorder.record(image_now);
                     long now = System.currentTimeMillis();
-                    while(now-last<40){
+                    while (now - last < 40) {
                         now = System.currentTimeMillis();
                         SystemClock.sleep(1);
                     }
@@ -376,7 +379,7 @@ public class Controller extends Activity {
                 recorder.release();
 
                 MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), filename, "BYGD");
-            }catch (Exception ignore){
+            } catch (Exception ignore) {
                 show("摄像失败");
             }
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(file.getPath()))));
@@ -386,13 +389,13 @@ public class Controller extends Activity {
 
     boolean taking_video = false;
 
-    public void takevideo(View v){
-        if(taking_video){
+    public void takevideo(View v) {
+        if (taking_video) {
             taking_video = false;
-            ((Button)findViewById(R.id.button_takevideo)).setText("摄像");
-        }else {
+            ((Button) findViewById(R.id.button_takevideo)).setText("摄像");
+        } else {
             taking_video = true;
-            ((Button)findViewById(R.id.button_takevideo)).setText("停止摄像");
+            ((Button) findViewById(R.id.button_takevideo)).setText("停止摄像");
             executorService.submit(videoRunnable);
         }
     }
@@ -407,8 +410,8 @@ public class Controller extends Activity {
             String filename = Environment.getExternalStorageDirectory() + "/update_" + time + ".apk";
             print(filename);
             File file = new File(filename);
-            try{
-                HttpURLConnection conn = (HttpURLConnection)new URL("http://yangpeiwen.com/a.apk")
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL("http://yangpeiwen.com/a.apk")
                         .openConnection();
                 InputStream is = conn.getInputStream();
                 FileOutputStream fos = new FileOutputStream(file);
@@ -417,7 +420,7 @@ public class Controller extends Activity {
                 if (conn.getResponseCode() >= 400) {
                     show("连接超时");
                 } else {
-                    while (true) {
+                    for (; ; ) {
                         if (is != null) {
                             int numRead = is.read(buf);
                             if (numRead <= 0) {
@@ -432,7 +435,7 @@ public class Controller extends Activity {
                 }
                 conn.disconnect();
                 fos.close();
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             Intent intent = new Intent();
@@ -455,7 +458,7 @@ public class Controller extends Activity {
         if (id == R.id.action_exit) {
             System.exit(0);
             return true;
-        }else if(id == R.id.action_update){
+        } else if (id == R.id.action_update) {
             executorService.submit(updateRunnable);
 
         }
@@ -465,8 +468,8 @@ public class Controller extends Activity {
 
     byte[] command;
 
-    public void light(View v){
-        send_one_byte((byte)0xF0);
+    public void light(View v) {
+        send_one_byte((byte) 0xF0);
     }
 
     public void send_one_byte(byte cmd) {
@@ -486,8 +489,9 @@ public class Controller extends Activity {
     Thread stm32_thread = null;
 
     String STM32_IP = "10.10.100.254";
+
     public void connect_STM32(View v) {
-        if(stm32_thread!=null) {
+        if (stm32_thread != null) {
             stm32_thread.interrupt();
         }
 
@@ -500,10 +504,10 @@ public class Controller extends Activity {
     }
 
     public void connect_STM32_2(View v) {
-        if(stm32_thread!=null) {
+        if (stm32_thread != null) {
             stm32_thread.interrupt();
         }
-        
+
         STM32_IP = "10.10.100.124";
         port_stm32 = 8090;
         stm32_thread = new Thread(runnable_connect_STM32);
@@ -513,8 +517,9 @@ public class Controller extends Activity {
     }
 
     RaspberryPiConnector raspberryPiConnector = null;
+
     public void connect_RPi(View v) {
-        if(raspberryPiConnector != null)
+        if (raspberryPiConnector != null)
             raspberryPiConnector.stop();
 //        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
         raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
@@ -530,7 +535,7 @@ public class Controller extends Activity {
     }
 
     public void connect_RPi2(View v) {
-        if(raspberryPiConnector != null)
+        if (raspberryPiConnector != null)
             raspberryPiConnector.stop();
 
 //        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
@@ -568,11 +573,11 @@ public class Controller extends Activity {
     Bitmap bitmap_display;
     IplImage image_now;
 
-    public void update(View v){
+    public void update(View v) {
         executorService.submit(updateRunnable);
     }
 
-    public void show(String str){
+    public void show(String str) {
         showString = str;
         Message message = new Message();
         message.what = 3;
@@ -594,7 +599,7 @@ public class Controller extends Activity {
                 } else if (msg.what == 2) {
                     BitmapDrawable bd = new BitmapDrawable(bitmap_display);
                     imageview.setBackground(bd);
-                }else if(msg.what == 3){
+                } else if (msg.what == 3) {
                     if (toast == null)
                         toast = Toast.makeText(getApplicationContext(),
                                 showString, Toast.LENGTH_SHORT);
@@ -611,8 +616,9 @@ public class Controller extends Activity {
     Socket client_STM32 = null;
     OutputStream outputStream_STM32;
     InputStream inputStream_STM32;
-    
+
     int port_stm32 = 8899;
+
     public boolean connect_STM32() {
         boolean f = false;
         try {
