@@ -64,6 +64,7 @@ public class Controller extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        //check wifi
         if (!Common.isWifiConnected(this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("需要连接WiFi后才能操控哟~");
@@ -291,8 +292,6 @@ public class Controller extends Activity {
                 return false;
             }
         });
-
-
     }
 
     int nowangle = 0, lastangle = 0;
@@ -521,8 +520,8 @@ public class Controller extends Activity {
     public void connect_RPi(View v) {
         if (raspberryPiConnector != null)
             raspberryPiConnector.stop();
-//        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
-        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("192.168.9.1", 8080);
+//        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
         raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {

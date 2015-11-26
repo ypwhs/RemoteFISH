@@ -15,7 +15,7 @@ public class Connector {
     public Connector(String RPi_ip, int RPi_port) {
         ip = RPi_ip;
         port = RPi_port;
-        connect();
+        //connect();
     }
 
     boolean running = true;
