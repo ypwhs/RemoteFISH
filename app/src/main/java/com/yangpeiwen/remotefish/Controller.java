@@ -72,7 +72,7 @@ public class Controller extends Activity {
 
         //添加航向角
         SensorManager sensorManager;
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         Sensor oriSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         sensorManager.registerListener(new SensorEventListener() {
@@ -81,14 +81,15 @@ public class Controller extends Activity {
                  * 方向传感器
                  */
 
-                float x=event.values[0];
+                float x = event.values[0];
                 yaw = x;
-                String output = "yaw=\t"+String.valueOf(x)+"\r\n";
+                String output = "yaw=\t" + String.valueOf(x) + "\r\n";
 
-                TextView outpuTextView =(TextView)findViewById(R.id.textView_ori);
+                TextView outpuTextView = (TextView) findViewById(R.id.textView_ori);
                 outpuTextView.setText(output);
 
             }
+
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
             }
         }, oriSensor, SensorManager.SENSOR_DELAY_GAME);
@@ -186,7 +187,7 @@ public class Controller extends Activity {
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                angle = ((int)yaw+angle)%360;
+                angle = ((int) yaw + angle + 90) % 360;
                 byte[] cmd = new byte[5];
                 cmd[0] = (byte) 0xC1;
                 cmd[1] = (byte) 0xC2;
