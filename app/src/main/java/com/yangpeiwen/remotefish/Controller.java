@@ -11,6 +11,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -59,10 +63,35 @@ public class Controller extends Activity {
     TextView joystickTextview;
     Thread refreshString;
 
+    float yaw = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        //添加航向角
+        SensorManager sensorManager;
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+        Sensor oriSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        sensorManager.registerListener(new SensorEventListener() {
+            public void onSensorChanged(SensorEvent event) {
+                /**
+                 * 方向传感器
+                 */
+
+                float x=event.values[0];
+                yaw = x;
+                String output = "yaw=\t"+String.valueOf(x)+"\r\n";
+
+                TextView outpuTextView =(TextView)findViewById(R.id.textView_ori);
+                outpuTextView.setText(output);
+
+            }
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+        }, oriSensor, SensorManager.SENSOR_DELAY_GAME);
 
         //check wifi
         if (!Common.isWifiConnected(this)) {
@@ -157,6 +186,7 @@ public class Controller extends Activity {
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
+                angle = ((int)yaw+angle)%360;
                 byte[] cmd = new byte[5];
                 cmd[0] = (byte) 0xC1;
                 cmd[1] = (byte) 0xC2;
@@ -520,8 +550,8 @@ public class Controller extends Activity {
     public void connect_RPi(View v) {
         if (raspberryPiConnector != null)
             raspberryPiConnector.stop();
-        raspberryPiConnector = new RaspberryPiConnector("192.168.9.1", 8080);
-//        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
+//        raspberryPiConnector = new RaspberryPiConnector("192.168.1.103", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
         raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {

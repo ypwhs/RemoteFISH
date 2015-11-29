@@ -89,6 +89,7 @@
         android:layout_height="wrap_content"
         android:text="拍照"
         android:layout_toRightOf="@+id/button"
+        android:layout_toEndOf="@+id/button"
         android:id="@+id/button_takephoto"
         android:onClick="takephoto" />
 
@@ -168,8 +169,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="右"
-        android:visibility="invisible"
         android:id="@+id/button_d"
+        android:visibility="invisible"
         android:layout_above="@+id/button_s"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
@@ -179,8 +180,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="后"
-        android:visibility="invisible"
         android:id="@+id/button_s"
+        android:visibility="invisible"
         android:layout_above="@+id/textView_joystick"
         android:layout_toLeftOf="@+id/button_d"
         android:layout_toStartOf="@+id/textView_joystick" />
@@ -199,11 +200,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="前"
-        android:visibility="invisible"
         android:id="@+id/button_w"
+        android:visibility="invisible"
         android:layout_above="@+id/button_a"
         android:layout_alignLeft="@+id/button_s"
         android:layout_alignStart="@+id/button_s" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView_ori"
+        android:layout_below="@+id/textView_data"
+        android:layout_alignRight="@+id/joystickView"
+        android:layout_alignEnd="@+id/joystickView" />
 
 
 </RelativeLayout>

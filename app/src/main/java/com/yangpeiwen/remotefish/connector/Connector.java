@@ -28,7 +28,7 @@ public class Connector {
         boolean success = false;
         try {
             Socket client = new Socket(ip, port);
-            client.setSoTimeout(200);
+            client.setSoTimeout(100);
             inputStream = client.getInputStream();
             outputStream = client.getOutputStream();
             success = true;

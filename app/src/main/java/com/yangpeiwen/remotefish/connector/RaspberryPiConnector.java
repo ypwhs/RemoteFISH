@@ -25,7 +25,7 @@ public class RaspberryPiConnector extends Connector {
         @Override
         public void run() {
             int fail = 0;
-            while (fail < 10 && running) {
+            while (fail < 100 && running) {
                 if (connect()) {
                     fail = 0;
                     Bitmap bitmap = readimage();
