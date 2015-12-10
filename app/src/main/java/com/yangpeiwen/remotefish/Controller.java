@@ -119,6 +119,7 @@ public class Controller extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_controller);
+        setVisibility(true);
 
         imageview = (ImageView) findViewById(R.id.imageView);
 
@@ -352,6 +353,21 @@ public class Controller extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_controller, menu);
         return true;
+    }
+
+    public void setVisibility(boolean isstudent){
+        final int studentids[] = { R.id.button_w, R.id.button_a, R.id.button_s, R.id.button_d};
+        final int studentids2[] = { R.id.joystickView, R.id.button_up, R.id.button_down, R.id.seekBar, R.id.seekBar2, R.id.button_connect_2, R.id.button_connectPi2, R.id.textView_ori };
+        for(int id: studentids){
+            findViewById(id).setVisibility(isstudent?View.VISIBLE:View.INVISIBLE);
+        }
+        for(int id: studentids2){
+            findViewById(id).setVisibility(isstudent?View.INVISIBLE:View.VISIBLE);
+        }
+        if(isstudent){
+            ((Button)findViewById(R.id.button_connectPi)).setText("打开\n摄像头");
+            ((Button)findViewById(R.id.button_connect)).setText("开机");
+        }
     }
 
     public void takephoto(View v) {
