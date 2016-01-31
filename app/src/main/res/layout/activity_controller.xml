@@ -29,6 +29,7 @@
         android:text="STM32 2"
         android:id="@+id/button_connect_2"
         android:onClick="connect_STM32_2"
+        android:visibility="invisible"
         android:layout_below="@+id/button_connectPi"
         android:layout_toLeftOf="@+id/button_connect" />
 
@@ -59,11 +60,11 @@
         android:id="@+id/imageView"
         android:layout_alignParentBottom="true"
         android:scaleType="fitCenter"
-        android:minWidth="280dp"
-        android:minHeight="210dp"
-        android:background="#CCCCCC" />
-
-
+        android:background="#CCCCCC"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:minWidth="400dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -109,6 +110,7 @@
         android:text="RPi 2"
         android:id="@+id/button_connectPi2"
         android:onClick="connect_RPi2"
+        android:visibility="invisible"
         android:layout_alignTop="@+id/button_connectPi"
         android:layout_toLeftOf="@+id/button_connectPi"
         android:layout_toStartOf="@+id/button_connectPi" />
@@ -214,6 +216,16 @@
         android:layout_below="@+id/textView_data"
         android:layout_alignRight="@+id/joystickView"
         android:layout_alignEnd="@+id/joystickView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TEST"
+        android:id="@+id/button_test"
+        android:onClick="test"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/button_connectPi"
+        android:layout_toStartOf="@+id/button_connectPi" />
 
 
 </RelativeLayout>

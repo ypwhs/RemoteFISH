@@ -48,6 +48,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -119,7 +121,7 @@ public class Controller extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_controller);
-        setVisibility(true);
+        setVisibility(false);
 
         imageview = (ImageView) findViewById(R.id.imageView);
 
@@ -356,8 +358,22 @@ public class Controller extends Activity {
     }
 
     public void setVisibility(boolean isstudent){
-        final int studentids[] = { R.id.button_w, R.id.button_a, R.id.button_s, R.id.button_d};
-        final int studentids2[] = { R.id.joystickView, R.id.button_up, R.id.button_down, R.id.seekBar, R.id.seekBar2, R.id.button_connect_2, R.id.button_connectPi2, R.id.textView_ori };
+        final int studentids[] = {
+                R.id.button_w,
+                R.id.button_a,
+                R.id.button_s,
+                R.id.button_d,
+        };
+        final int studentids2[] = {
+                R.id.joystickView,
+                R.id.button_up,
+                R.id.button_down,
+                R.id.seekBar,
+                R.id.seekBar2,
+//                R.id.button_connect_2,
+//                R.id.button_connectPi2,
+                R.id.textView_ori,
+        };
         for(int id: studentids){
             findViewById(id).setVisibility(isstudent?View.VISIBLE:View.INVISIBLE);
         }
@@ -454,7 +470,7 @@ public class Controller extends Activity {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             String time = format.format(date);
             String filename = Environment.getExternalStorageDirectory() + "/update_" + time + ".apk";
-            print(filename);
+            Common.print(filename);
             File file = new File(filename);
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL("http://yangpeiwen.com/a.apk")
@@ -567,8 +583,8 @@ public class Controller extends Activity {
     public void connect_RPi(View v) {
         if (raspberryPiConnector != null)
             raspberryPiConnector.stop();
-//        raspberryPiConnector = new RaspberryPiConnector("192.168.1.103", 8080);
-        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("192.168.1.66", 8080);
+//        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
         raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
@@ -585,7 +601,7 @@ public class Controller extends Activity {
             raspberryPiConnector.stop();
 
 //        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
-        raspberryPiConnector = new RaspberryPiConnector("10.10.100.124", 8080);
+        raspberryPiConnector = new RaspberryPiConnector("192.168.1.66", 8080);
         raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
@@ -604,14 +620,14 @@ public class Controller extends Activity {
         public void run() {
             boolean success = connect_STM32();
             if (success) {
-                print("连接成功");
+                Common.print("连接成功");
                 datastring = "连接成功";
                 while (!Thread.currentThread().isInterrupted()) {
                     byte[] data = read_STM32();
                     datastring = Common.bytesToHexString(data);
                 }
             } else {
-                print("连接失败");
+                Common.print("连接失败");
             }
         }
     };
@@ -674,7 +690,7 @@ public class Controller extends Activity {
             f = true;
         } catch (Exception e) {
             e.printStackTrace();
-            print("错误:" + e.getMessage());
+            Common.print("错误:" + e.getMessage());
         }
         return f;
     }
@@ -712,15 +728,19 @@ public class Controller extends Activity {
             e.printStackTrace();
         }
         if (read2 != null) {
-            print("读到数据:" + Common.bytesToHexString(read2) + ",长度:" + read2.length);
+            Common.print("读到数据:" + Common.bytesToHexString(read2) + ",长度:" + read2.length);
         }
         return read2;
     }
 
-    public void print(String p) {
-        System.out.println("OUT:" + p);
-        // show(p);
-        // SystemClock.sleep(200);
+    public void test(View v){
+        byte a[] = new byte[2];
+        a[0] = (byte) 0x01;
+        a[1] = (byte) 0x01;
+        byte b[] = Encrypt.zhuan(a);
+        Encrypt.generateKey();
+        Common.print(Encrypt.bytesToHexString(b));
+        Common.print(Encrypt.bytesToHexString(Encrypt.encrypt(b)));
     }
 
     private ExecutorService executorService = Executors.newFixedThreadPool(4);
