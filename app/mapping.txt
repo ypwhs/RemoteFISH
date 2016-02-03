@@ -33355,7 +33355,7 @@ com.yangpeiwen.remotefish.Controller -> com.yangpeiwen.remotefish.Controller:
     java.lang.Runnable runnable_send_stm32 -> o
     java.lang.Thread stm32_thread -> p
     java.lang.String STM32_IP -> q
-    com.yangpeiwen.remotefish.connector.RaspberryPiConnector raspberryPiConnector -> r
+    com.yangpeiwen.remotefish.connector.ImageServerConnector raspberryPiConnector -> r
     java.lang.String datastring -> s
     java.lang.Runnable runnable_connect_STM32 -> t
     android.graphics.Bitmap bitmap_display -> u
@@ -33526,20 +33526,20 @@ com.yangpeiwen.remotefish.connector.Connector$1 -> com.yangpeiwen.remotefish.a.b
     com.yangpeiwen.remotefish.connector.Connector this$0 -> a
     void <init>(com.yangpeiwen.remotefish.connector.Connector) -> <init>
     void run() -> run
-com.yangpeiwen.remotefish.connector.RaspberryPiConnector -> com.yangpeiwen.remotefish.a.c:
+com.yangpeiwen.remotefish.connector.ImageServerConnector -> com.yangpeiwen.remotefish.a.c:
     java.lang.Runnable runnable_read_image -> f
-    com.yangpeiwen.remotefish.connector.RaspberryPiConnector$OnPictureReceivedListener onPictureReceivedListener -> g
+    com.yangpeiwen.remotefish.connector.ImageServerConnector$OnPictureReceivedListener onPictureReceivedListener -> g
     void <init>(java.lang.String,int) -> <init>
     void startReadImage() -> c
     android.graphics.Bitmap readimage() -> d
-    void setOnPictureReceivedListener(com.yangpeiwen.remotefish.connector.RaspberryPiConnector$OnPictureReceivedListener) -> a
-    android.graphics.Bitmap access$000(com.yangpeiwen.remotefish.connector.RaspberryPiConnector) -> a
-    com.yangpeiwen.remotefish.connector.RaspberryPiConnector$OnPictureReceivedListener access$100(com.yangpeiwen.remotefish.connector.RaspberryPiConnector) -> b
-com.yangpeiwen.remotefish.connector.RaspberryPiConnector$1 -> com.yangpeiwen.remotefish.a.d:
-    com.yangpeiwen.remotefish.connector.RaspberryPiConnector this$0 -> a
-    void <init>(com.yangpeiwen.remotefish.connector.RaspberryPiConnector) -> <init>
+    void setOnPictureReceivedListener(com.yangpeiwen.remotefish.connector.ImageServerConnector$OnPictureReceivedListener) -> a
+    android.graphics.Bitmap access$000(com.yangpeiwen.remotefish.connector.ImageServerConnector) -> a
+    com.yangpeiwen.remotefish.connector.ImageServerConnector$OnPictureReceivedListener access$100(com.yangpeiwen.remotefish.connector.ImageServerConnector) -> b
+com.yangpeiwen.remotefish.connector.ImageServerConnector$1 -> com.yangpeiwen.remotefish.a.d:
+    com.yangpeiwen.remotefish.connector.ImageServerConnector this$0 -> a
+    void <init>(com.yangpeiwen.remotefish.connector.ImageServerConnector) -> <init>
     void run() -> run
-com.yangpeiwen.remotefish.connector.RaspberryPiConnector$OnPictureReceivedListener -> com.yangpeiwen.remotefish.a.e:
+com.yangpeiwen.remotefish.connector.ImageServerConnector$OnPictureReceivedListener -> com.yangpeiwen.remotefish.a.e:
     void onPictureReceived(android.graphics.Bitmap) -> a
 com.yangpeiwen.remotefish.util.FFmpegFrameRecorder -> com.yangpeiwen.remotefish.b.a:
     com.googlecode.javacv.FrameRecorder$Exception loadingException -> b

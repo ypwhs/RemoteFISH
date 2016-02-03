@@ -23,33 +23,28 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.googlecode.javacv.cpp.avcodec;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.yangpeiwen.remotefish.connector.RaspberryPiConnector;
+import com.yangpeiwen.remotefish.connector.Encrypt;
+import com.yangpeiwen.remotefish.connector.ImageServerConnector;
+import com.yangpeiwen.remotefish.connector.Ser2netConnector;
 import com.yangpeiwen.remotefish.util.FFmpegFrameRecorder;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.Socket;
 import java.net.URL;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,28 +68,28 @@ public class Controller extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         //添加航向角
-        SensorManager sensorManager;
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        Sensor oriSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-        sensorManager.registerListener(new SensorEventListener() {
-            public void onSensorChanged(SensorEvent event) {
-                /**
-                 * 方向传感器
-                 */
-
-                float x = event.values[0];
-                yaw = x;
-                String output = "yaw=\t" + String.valueOf(x) + "\r\n";
-
-                TextView outpuTextView = (TextView) findViewById(R.id.textView_ori);
-                outpuTextView.setText(output);
-
-            }
-
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            }
-        }, oriSensor, SensorManager.SENSOR_DELAY_GAME);
+//        SensorManager sensorManager;
+//        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+//
+//        Sensor oriSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+//        sensorManager.registerListener(new SensorEventListener() {
+//            public void onSensorChanged(SensorEvent event) {
+//                /**
+//                 * 方向传感器
+//                 */
+//
+//                float x = event.values[0];
+//                yaw = x;
+//                String output = "yaw=\t" + String.valueOf(x) + "\r\n";
+//
+//                TextView outpuTextView = (TextView) findViewById(R.id.textView_ori);
+//                outpuTextView.setText(output);
+//
+//            }
+//
+//            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//            }
+//        }, oriSensor, SensorManager.SENSOR_DELAY_GAME);
 
         //check wifi
         if (!Common.isWifiConnected(this)) {
@@ -121,7 +116,9 @@ public class Controller extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_controller);
-        setVisibility(false);
+
+        //载入RSA Key
+        Encrypt.getPublicKey();
 
         imageview = (ImageView) findViewById(R.id.imageView);
 
@@ -140,66 +137,27 @@ public class Controller extends Activity {
         refreshString.setDaemon(true);
         refreshString.start();
 
-        SeekBar seekBar_x = (SeekBar) findViewById(R.id.seekBar);
-        seekBar_x.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                command = new byte[4];
-                command[0] = (byte) 0xC4;
-                command[1] = (byte) 0xC5;
-                command[2] = (byte) 0xC6;
-                command[3] = (byte) (progress + 0xD0);
-                executorService.execute(runnable_send_stm32);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-
-        });
-
-        SeekBar seekBar_y = (SeekBar) findViewById(R.id.seekBar2);
-        seekBar_y.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                command = new byte[4];
-                command[0] = (byte) 0xC4;
-                command[1] = (byte) 0xC5;
-                command[2] = (byte) 0xC6;
-                command[3] = (byte) (progress + 0xE0);
-                executorService.execute(runnable_send_stm32);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-
-        });
-
         joystickTextview = (TextView) findViewById(R.id.textView_joystick);
 
         JoystickView joystick = (JoystickView) findViewById(R.id.joystickView);
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                angle = ((int) yaw + angle + 90) % 360;
-                byte[] cmd = new byte[5];
-                cmd[0] = (byte) 0xC1;
-                cmd[1] = (byte) 0xC2;
-                cmd[2] = (byte) 0xC3;
-                cmd[3] = (byte) (angle / 10);
-                cmd[4] = (byte) (0xD0 + power / 10);
-                joystickTextview.setText(angle + "," + power + "\n" + Common.bytesToHexString(cmd));
+                angle = ( angle + 90) % 360;
+                joystickTextview.setText(angle + "," + power + "\n" );
                 nowangle = angle;
                 nowspd = power;
+            }
+        }, JoystickView.DEFAULT_LOOP_INTERVAL);
+
+        JoystickView joystick2 = (JoystickView) findViewById(R.id.joystickView2);
+        joystick2.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
+            @Override
+            public void onValueChanged(int angle, int power, int direction) {
+                angle = ( angle + 90) % 360;
+                joystickTextview.setText(angle + "," + power + "\n" );
+                nowangle2 = angle;
+                nowspd2 = power;
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
@@ -213,13 +171,24 @@ public class Controller extends Activity {
                             lastspd = nowspd;
                             lasttime = nowtime;
                             lastangle = nowangle;
-                            command = new byte[5];
-                            command[0] = (byte) 0xC1;
-                            command[1] = (byte) 0xC2;
-                            command[2] = (byte) 0xC3;
-                            command[3] = (byte) (nowangle / 10);
-                            command[4] = (byte) (0xD0 + nowspd / 10);
-                            executorService.execute(runnable_send_stm32);
+                            command = (byte)0x81;
+                            raw_data = new byte[2];
+                            raw_data[0] = (byte) (nowangle / 10);
+                            raw_data[1] = (byte) (nowspd / 10);
+                            executorService.execute(send_raw);
+                        }
+                    }
+
+                    if (nowtime2 - lasttime2 > 100) {
+                        if ((nowangle2 != lastangle2) | (nowspd2 != lastspd2)) {
+                            lastspd2 = nowspd2;
+                            lasttime2 = nowtime2;
+                            lastangle2 = nowangle2;
+                            command = (byte)0x82;
+                            raw_data = new byte[2];
+                            raw_data[0] = (byte) (nowangle2 / 10);
+                            raw_data[1] = (byte) (nowspd2 / 10);
+                            executorService.execute(send_raw);
                         }
                     }
                     SystemClock.sleep(10);
@@ -228,162 +197,33 @@ public class Controller extends Activity {
         });
         sendThread.setDaemon(true);
         sendThread.start();
-
-        findViewById(R.id.button_w).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == KeyEvent.ACTION_DOWN) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (0 / 10);
-                    command[4] = (byte) (0xDA);
-                    executorService.execute(runnable_send_stm32);
-                } else if (action == KeyEvent.ACTION_UP) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (0 / 10);
-                    command[4] = (byte) (0xD0);
-                    executorService.execute(runnable_send_stm32);
-                }
-                return false;
-            }
-        });
-
-        findViewById(R.id.button_d).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == KeyEvent.ACTION_DOWN) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (90 / 10);
-                    command[4] = (byte) (0xDA);
-                    executorService.execute(runnable_send_stm32);
-                } else if (action == KeyEvent.ACTION_UP) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (0 / 10);
-                    command[4] = (byte) (0xD0);
-                    executorService.execute(runnable_send_stm32);
-                }
-                return false;
-            }
-        });
-        findViewById(R.id.button_s).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == KeyEvent.ACTION_DOWN) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (180 / 10);
-                    command[4] = (byte) (0xDA);
-                    executorService.execute(runnable_send_stm32);
-                } else if (action == KeyEvent.ACTION_UP) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (0 / 10);
-                    command[4] = (byte) (0xD0);
-                    executorService.execute(runnable_send_stm32);
-                }
-                return false;
-            }
-        });
-        findViewById(R.id.button_a).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                if (action == KeyEvent.ACTION_DOWN) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (270 / 10);
-                    command[4] = (byte) (0xDA);
-                    executorService.execute(runnable_send_stm32);
-                } else if (action == KeyEvent.ACTION_UP) {
-                    command = new byte[5];
-                    command[0] = (byte) 0xC1;
-                    command[1] = (byte) 0xC2;
-                    command[2] = (byte) 0xC3;
-                    command[3] = (byte) (0 / 10);
-                    command[4] = (byte) (0xD0);
-                    executorService.execute(runnable_send_stm32);
-                }
-                return false;
-            }
-        });
     }
+
+    Runnable send_raw = new Runnable() {
+        public void run() {
+            if (ser2netConnector.sendCommandData(command, raw_data)) {
+                show("发送指令成功");
+            } else {
+                show("发送指令失败");
+            }
+        }
+    };
+
+    byte[] raw_data;
+    byte command;
 
     int nowangle = 0, lastangle = 0;
     int nowspd = 0, lastspd = 0;
+    int nowangle2 = 0, lastangle2 = 0;
+    int nowspd2 = 0, lastspd2 = 0;
+    long nowtime2 = 0, lasttime2 = 0;
     long nowtime = 0, lasttime = 0;
-
-    public void up(View v) {
-        command = new byte[4];
-        command[0] = (byte) 0xC4;
-        command[1] = (byte) 0xC5;
-        command[2] = (byte) 0xC6;
-        command[3] = (byte) 0xBA;
-        executorService.execute(runnable_send_stm32);
-    }
-
-    public void down(View v) {
-        command = new byte[4];
-        command[0] = (byte) 0xC4;
-        command[1] = (byte) 0xC5;
-        command[2] = (byte) 0xC6;
-        command[3] = (byte) 0xBB;
-        executorService.execute(runnable_send_stm32);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_controller, menu);
         return true;
-    }
-
-    public void setVisibility(boolean isstudent){
-        final int studentids[] = {
-                R.id.button_w,
-                R.id.button_a,
-                R.id.button_s,
-                R.id.button_d,
-        };
-        final int studentids2[] = {
-                R.id.joystickView,
-                R.id.button_up,
-                R.id.button_down,
-                R.id.seekBar,
-                R.id.seekBar2,
-//                R.id.button_connect_2,
-//                R.id.button_connectPi2,
-                R.id.textView_ori,
-        };
-        for(int id: studentids){
-            findViewById(id).setVisibility(isstudent?View.VISIBLE:View.INVISIBLE);
-        }
-        for(int id: studentids2){
-            findViewById(id).setVisibility(isstudent?View.INVISIBLE:View.VISIBLE);
-        }
-        if(isstudent){
-            ((Button)findViewById(R.id.button_connectPi)).setText("打开\n摄像头");
-            ((Button)findViewById(R.id.button_connect)).setText("开机");
-        }
     }
 
     public void takephoto(View v) {
@@ -528,64 +368,39 @@ public class Controller extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    byte[] command;
-
     public void light(View v) {
-        send_one_byte((byte) 0xF0);
+//        send_one_byte((byte) 0xF0);
     }
 
-    public void send_one_byte(byte cmd) {
-        command = new byte[1];
-        command[0] = cmd;
-        executorService.execute(runnable_send_stm32);
+    String NanoPi2_IP = "192.168.1.97";
+    static Ser2netConnector ser2netConnector;
+
+    public void connect_STM32(View v) {
+        if (ser2netConnector != null) {
+            ser2netConnector.stop();
+        }
+        ser2netConnector = new Ser2netConnector(NanoPi2_IP, 8081);
+        executorService.submit(ser2net_connect);
     }
 
-
-    Runnable runnable_send_stm32 = new Runnable() {
+    Runnable ser2net_connect = new Runnable() {
         @Override
         public void run() {
-            send_STM32(command);
+            ser2netConnector.connect();
+            datastring = "连接成功，正在获取验证码";
+            if (ser2netConnector.getVerifyCode()) datastring = "获取验证码成功";
+            else datastring = "获取验证码失败";
         }
     };
 
-    Thread stm32_thread = null;
-
-    String STM32_IP = "10.10.100.254";
-
-    public void connect_STM32(View v) {
-        if (stm32_thread != null) {
-            stm32_thread.interrupt();
-        }
-
-        STM32_IP = "10.10.100.254";
-        port_stm32 = 8899;
-        stm32_thread = new Thread(runnable_connect_STM32);
-        stm32_thread.setDaemon(true);
-        stm32_thread.start();
-        datastring = "连接中";
-    }
-
-    public void connect_STM32_2(View v) {
-        if (stm32_thread != null) {
-            stm32_thread.interrupt();
-        }
-
-        STM32_IP = "10.10.100.124";
-        port_stm32 = 8090;
-        stm32_thread = new Thread(runnable_connect_STM32);
-        stm32_thread.setDaemon(true);
-        stm32_thread.start();
-        datastring = "连接中";
-    }
-
-    RaspberryPiConnector raspberryPiConnector = null;
+    ImageServerConnector imageServerConnector = null;
 
     public void connect_RPi(View v) {
-        if (raspberryPiConnector != null)
-            raspberryPiConnector.stop();
-        raspberryPiConnector = new RaspberryPiConnector("192.168.1.66", 8080);
-//        raspberryPiConnector = new RaspberryPiConnector("10.10.100.123", 8080);
-        raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
+        if (imageServerConnector != null)
+            imageServerConnector.stop();
+        imageServerConnector = new ImageServerConnector(NanoPi2_IP, 8080);
+//        imageServerConnector = new ImageServerConnector("10.10.100.123", 8080);
+        imageServerConnector.setOnPictureReceivedListener(new ImageServerConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
@@ -597,12 +412,12 @@ public class Controller extends Activity {
     }
 
     public void connect_RPi2(View v) {
-        if (raspberryPiConnector != null)
-            raspberryPiConnector.stop();
+        if (imageServerConnector != null)
+            imageServerConnector.stop();
 
-//        raspberryPiConnector = new RaspberryPiConnector("192.168.0.128", 8080);
-        raspberryPiConnector = new RaspberryPiConnector("192.168.1.66", 8080);
-        raspberryPiConnector.setOnPictureReceivedListener(new RaspberryPiConnector.OnPictureReceivedListener() {
+//        imageServerConnector = new ImageServerConnector("192.168.0.128", 8080);
+        imageServerConnector = new ImageServerConnector("192.168.1.66", 8080);
+        imageServerConnector.setOnPictureReceivedListener(new ImageServerConnector.OnPictureReceivedListener() {
             @Override
             public void onPictureReceived(Bitmap picture) {
                 bitmap_display = picture;
@@ -613,24 +428,6 @@ public class Controller extends Activity {
             }
         });
     }
-
-    String datastring;
-    Runnable runnable_connect_STM32 = new Runnable() {
-        @Override
-        public void run() {
-            boolean success = connect_STM32();
-            if (success) {
-                Common.print("连接成功");
-                datastring = "连接成功";
-                while (!Thread.currentThread().isInterrupted()) {
-                    byte[] data = read_STM32();
-                    datastring = Common.bytesToHexString(data);
-                }
-            } else {
-                Common.print("连接失败");
-            }
-        }
-    };
 
     Bitmap bitmap_display;
     IplImage image_now;
@@ -648,7 +445,7 @@ public class Controller extends Activity {
 
     String showString = "";
     Toast toast;
-
+    String datastring;
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -675,72 +472,16 @@ public class Controller extends Activity {
         }
     };
 
-    Socket client_STM32 = null;
-    OutputStream outputStream_STM32;
-    InputStream inputStream_STM32;
-
-    int port_stm32 = 8899;
-
-    public boolean connect_STM32() {
-        boolean f = false;
-        try {
-            client_STM32 = new Socket(STM32_IP, port_stm32);
-            outputStream_STM32 = client_STM32.getOutputStream();
-            inputStream_STM32 = client_STM32.getInputStream();
-            f = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Common.print("错误:" + e.getMessage());
-        }
-        return f;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         System.exit(0);
     }
 
-    public boolean send_STM32(byte[] buf) {
-        boolean f = false;
-        try {
-            outputStream_STM32.write(buf);
-            outputStream_STM32.flush();
-            f = true;
-            datastring = "发送数据:" + Common.bytesToHexString(buf);
-        } catch (Exception e) {
-            //e.printStackTrace();
-            datastring = "发送失败:" + Common.bytesToHexString(buf);
-        }
-        return f;
-    }
-
-    public byte[] read_STM32() {
-        byte[] read2 = null;
-        try {
-            byte[] buffer = new byte[1024];
-            int len = inputStream_STM32.read(buffer);
-            read2 = new byte[len];
-            int j;
-            for (j = 0; j < len; j++)
-                read2[j] = buffer[j];
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (read2 != null) {
-            Common.print("读到数据:" + Common.bytesToHexString(read2) + ",长度:" + read2.length);
-        }
-        return read2;
-    }
-
-    public void test(View v){
-        byte a[] = new byte[2];
-        a[0] = (byte) 0x01;
-        a[1] = (byte) 0x01;
-        byte b[] = Encrypt.zhuan(a);
-        Encrypt.generateKey();
-        Common.print(Encrypt.bytesToHexString(b));
-        Common.print(Encrypt.bytesToHexString(Encrypt.encrypt(b)));
+    public void test(View v) {
+        Intent intent = new Intent();
+        intent.setClass(this, Setting.class);
+        startActivity(intent);
     }
 
     private ExecutorService executorService = Executors.newFixedThreadPool(4);

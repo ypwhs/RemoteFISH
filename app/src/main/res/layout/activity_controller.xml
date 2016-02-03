@@ -13,6 +13,14 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
+    <com.yangpeiwen.remotefish.JoystickView
+        android:id="@+id/joystickView2"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +39,8 @@
         android:onClick="connect_STM32_2"
         android:visibility="invisible"
         android:layout_below="@+id/button_connectPi"
-        android:layout_toLeftOf="@+id/button_connect" />
+        android:layout_toLeftOf="@+id/button_connect"
+        android:layout_toStartOf="@+id/button_connect"/>
 
 
     <TextView
@@ -55,26 +64,14 @@
         android:layout_alignParentEnd="true" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="240dp"
+        android:layout_height="180dp"
         android:id="@+id/imageView"
         android:layout_alignParentBottom="true"
         android:scaleType="fitCenter"
+        android:layout_centerHorizontal="true"
         android:background="#CCCCCC"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:minWidth="400dp"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开灯"
-        android:id="@+id/button_light"
-        android:onClick="light"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/button_takevideo"
-        android:layout_toEndOf="@+id/button_takevideo" />
 
     <Button
         android:layout_width="wrap_content"
@@ -124,89 +121,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/button_connect"
         android:layout_alignEnd="@+id/button_connect" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="UP"
-        android:id="@+id/button_up"
-        android:onClick="up"
-        android:layout_below="@+id/button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DOWN"
-        android:id="@+id/button_down"
-        android:onClick="down"
-        android:layout_alignTop="@+id/button_up"
-        android:layout_toRightOf="@+id/button_up"
-        android:layout_toEndOf="@+id/button_up" />
-
-    <SeekBar
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBar"
-        android:max="10"
-        android:progress="0"
-        android:layout_alignBottom="@+id/button_down"
-        android:layout_toRightOf="@+id/button_down"
-        android:layout_toEndOf="@+id/button_down"
-        android:indeterminate="false" />
-
-    <SeekBar
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBar2"
-        android:max="10"
-        android:progress="0"
-        android:indeterminate="false"
-        android:layout_alignTop="@+id/seekBar"
-        android:layout_toRightOf="@+id/seekBar"
-        android:layout_toEndOf="@+id/seekBar" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="右"
-        android:id="@+id/button_d"
-        android:visibility="invisible"
-        android:layout_above="@+id/button_s"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-         />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="后"
-        android:id="@+id/button_s"
-        android:visibility="invisible"
-        android:layout_above="@+id/textView_joystick"
-        android:layout_toLeftOf="@+id/button_d"
-        android:layout_toStartOf="@+id/textView_joystick" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="左"
-        android:id="@+id/button_a"
-        android:visibility="invisible"
-        android:layout_above="@+id/button_s"
-        android:layout_toLeftOf="@+id/button_s"
-        android:layout_toStartOf="@+id/button_s" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="前"
-        android:id="@+id/button_w"
-        android:visibility="invisible"
-        android:layout_above="@+id/button_a"
-        android:layout_alignLeft="@+id/button_s"
-        android:layout_alignStart="@+id/button_s" />
 
     <TextView
         android:layout_width="wrap_content"

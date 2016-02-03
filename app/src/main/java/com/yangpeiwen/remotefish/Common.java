@@ -3,6 +3,7 @@ package com.yangpeiwen.remotefish;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.widget.Toast;
 
 /**
  * Created by ypw
@@ -39,6 +40,28 @@ public class Common {
         System.out.println("OUT:" + p);
         // show(p);
         // SystemClock.sleep(200);
+    }
+
+    public static void printHex(String d, byte[] s){
+        print(d + ",length:" + s.length + ",data:" + bytesToHexString(s));
+    }
+
+    public static byte[] bytesAdd(byte[] data1, byte[] data2) {
+        byte[] data3 = new byte[data1.length + data2.length];
+        System.arraycopy(data1, 0, data3, 0, data1.length);
+        System.arraycopy(data2, 0, data3, data1.length, data2.length);
+        return data3;
+    }
+
+    static Toast toast;
+    public static void show(Context con, String str){
+        if(toast==null){
+            toast = Toast.makeText(con,
+                    str, Toast.LENGTH_SHORT);
+        }else{
+            toast.setText(str);
+        }
+        toast.show();
     }
 
 }

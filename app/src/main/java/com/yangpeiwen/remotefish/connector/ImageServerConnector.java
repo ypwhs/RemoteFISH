@@ -3,22 +3,51 @@ package com.yangpeiwen.remotefish.connector;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
 /**
  * Created by ypw
  * on 2015-11-07 下午11:57.
  */
 
-public class RaspberryPiConnector extends Connector {
+public class ImageServerConnector {
 
-    public RaspberryPiConnector(String RPi_ip, int RPi_port) {
-        super(RPi_ip, RPi_port);
+    public ImageServerConnector(String RPi_ip, int RPi_port) {
+        ip = RPi_ip;
+        port = RPi_port;
         startReadImage();
     }
+
+    boolean running = true;
+    String ip = "192.168.8.1";
+    int port = 8080;
+    InputStream inputStream;
+    OutputStream outputStream;
 
     public void startReadImage() {
         Thread thread_read_image = new Thread(runnable_read_image);
         thread_read_image.setDaemon(true);
         thread_read_image.start();
+    }
+
+    public boolean connect() {
+        boolean success = false;
+        try {
+            Socket client = new Socket(ip, port);
+            client.setSoTimeout(100);
+            inputStream = client.getInputStream();
+            outputStream = client.getOutputStream();
+            success = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public void stop() {
+        running = false;
     }
 
     private Runnable runnable_read_image = new Runnable() {

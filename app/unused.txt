@@ -6583,7 +6583,7 @@ com.yangpeiwen.remotefish.R$styleable
 com.yangpeiwen.remotefish.connector.Connector:
     63:66:public void startTransfer()
     71:72:public void write(byte[])
-com.yangpeiwen.remotefish.connector.STM32Connector
+com.yangpeiwen.remotefish.connector.Ser2netConnector
 com.yangpeiwen.remotefish.util.FFmpegFrameRecorder:
     83:83:public static com.yangpeiwen.remotefish.util.FFmpegFrameRecorder createDefault(java.io.File,int,int)
     84:84:public static com.yangpeiwen.remotefish.util.FFmpegFrameRecorder createDefault(java.lang.String,int,int)

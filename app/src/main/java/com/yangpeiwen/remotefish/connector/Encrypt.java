@@ -1,4 +1,4 @@
-package com.yangpeiwen.remotefish;
+package com.yangpeiwen.remotefish.connector;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -60,7 +60,7 @@ public class Encrypt {
         return crc;
     }
 
-    public static void generateKey(){
+    public static void generateKey() {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
             kpg.initialize(1024);
@@ -68,7 +68,7 @@ public class Encrypt {
             System.out.println(kp.getPublic());
             System.out.println(kp.getPrivate());
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -106,6 +106,19 @@ public class Encrypt {
         return buf;
     }
 
+    public static byte[] decrypt(byte[] data) {
+        Cipher cipher;
+        byte[] buf = null;
+        try {
+            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, publicKey);
+            buf = cipher.doFinal(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return buf;
+    }
+
     public static byte[] escape(byte[] buf) {
         byte[] rec = new byte[1024];
         int i, j = 0;
@@ -126,36 +139,35 @@ public class Encrypt {
         return rec2;
     }
 
-    public static String bytesToHexString(byte[] src) {
-        StringBuilder stringBuilder = new StringBuilder("");
-        if (src == null || src.length <= 0) {
-            return null;
+    public static byte[] unescape(byte[] buf) {
+        byte[] rec = new byte[1024];
+        int i, j = 0;
+
+        for (i = 0; i < buf.length; i++) {
+            if (buf[i] == 0x7D) {
+                rec[j++] = (byte) (buf[++i] ^ 0x40);
+            } else
+                rec[j++] = buf[i];
         }
-        for (byte aSrc : src) {
-            int v = aSrc & 0xFF;
-            String hv = Integer.toHexString(v);
-            if (hv.length() < 2) {
-                stringBuilder.append(0);
-            }
-            stringBuilder.append(hv.toUpperCase());
-        }
-        return stringBuilder.toString();
+
+        byte[] rec2 = new byte[j];
+        for (i = 0; i < j; i++)
+            rec2[i] = rec[i];
+        return rec2;
     }
 
-    public static String bytesToHexString2(byte[] src) {
-        StringBuilder stringBuilder = new StringBuilder("");
-        if (src == null || src.length <= 0) {
-            return null;
-        }
-        for (byte aSrc : src) {
-            int v = aSrc & 0xFF;
-            String hv = Integer.toHexString(v);
-            stringBuilder.append("0x");
-            if (hv.length() < 2) {
-                stringBuilder.append(0);
-            }
-            stringBuilder.append(hv.toUpperCase()).append(", ");
-        }
-        return stringBuilder.toString();
+    public static byte[] package_tcp(byte[] buf) {
+        byte[] rec = new byte[buf.length + 2];
+        rec[0] = (byte) 0xAA;
+        System.arraycopy(buf, 0, rec, 1, buf.length);
+        rec[buf.length + 1] = (byte) 0xBB;
+        return rec;
     }
+
+    public static byte[] unpackage (byte[] buf){
+        byte[] rec = new byte[256];
+        System.arraycopy(buf, 1, rec, 0, 256);
+        return rec;
+    }
+
 }

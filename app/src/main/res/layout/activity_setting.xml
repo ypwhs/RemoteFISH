@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="20dp"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#22000000"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_change_wifi_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="change_wifi_name"
+            android:text="修改WiFi名称" />
+
+        <Button
+            android:id="@+id/button_change_wifi_psk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_change_wifi_name"
+            android:layout_toRightOf="@+id/button_change_wifi_name"
+            android:onClick="change_wifi_psk"
+            android:text="修改WiFi密码" />
+
+        <Button
+            android:id="@+id/button_bootloader1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="跳转APP"
+            android:tag="0"
+            android:onClick="bootloader"
+            android:layout_below="@+id/button_change_wifi_name"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/button_bootloader2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="复位"
+            android:tag="1"
+            android:onClick="bootloader"
+            android:layout_below="@+id/button_change_wifi_name"
+            android:layout_toRightOf="@+id/button_bootloader1"
+            android:layout_toEndOf="@+id/button_bootloader1" />
+
+        <Button
+            android:id="@+id/button_bootloader3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="接收新的程序"
+            android:tag="2"
+            android:onClick="bootloader"
+            android:layout_below="@+id/button_change_wifi_psk"
+            android:layout_toRightOf="@+id/button_bootloader2"
+            android:layout_toEndOf="@+id/button_bootloader2" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#22000000"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_play_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="play_music"
+            android:text="播放音乐" />
+
+        <Button
+            android:id="@+id/button_record"
+            android:layout_width="180dp"
+            android:layout_height="120dp"
+            android:text="按住录音"
+            android:layout_below="@+id/button_play_music"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/button_reset_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="reset_audio"
+            android:layout_toRightOf="@+id/button_play_music"
+            android:layout_toEndOf="@id/button_play_music"
+            android:text="重置声卡"
+            android:layout_alignParentTop="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#22000000"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_emo0"
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="0"
+            android:text="人脸模式" />
+
+
+        <Button
+            android:id="@+id/button_emo1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="1"
+            android:text="眨眼"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/button_emo0"
+            android:layout_toEndOf="@+id/button_emo0" />
+
+        <Button
+            android:id="@+id/button_emo2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="2"
+            android:text="笑"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/button_emo1"
+            android:layout_toEndOf="@+id/button_emo1" />
+
+        <Button
+            android:id="@+id/button_emo3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="3"
+            android:text="哭"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/button_emo2"
+            android:layout_toEndOf="@+id/button_emo2" />
+
+        <Button
+            android:id="@+id/button_emo4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="4"
+            android:text="惊讶"
+            android:layout_below="@+id/button_emo1"
+            android:layout_toRightOf="@+id/button_emo5"
+            android:layout_toEndOf="@+id/button_emo5" />
+
+        <Button
+            android:id="@+id/button_emo5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="emo"
+            android:tag="5"
+            android:text="转眼珠"
+            android:layout_below="@+id/button_emo0"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+    </RelativeLayout>
+
+</LinearLayout>
