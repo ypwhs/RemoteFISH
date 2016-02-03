@@ -372,7 +372,7 @@ public class Controller extends Activity {
 //        send_one_byte((byte) 0xF0);
     }
 
-    String NanoPi2_IP = "192.168.1.97";
+    String NanoPi2_IP = "192.168.1.88";
     static Ser2netConnector ser2netConnector;
 
     public void connect_STM32(View v) {
