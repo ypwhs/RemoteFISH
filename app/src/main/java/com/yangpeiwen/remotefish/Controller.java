@@ -175,10 +175,12 @@ public class Controller extends Activity {
                             raw_data = new byte[2];
                             raw_data[0] = (byte) (nowangle / 10);
                             raw_data[1] = (byte) (nowspd / 10);
+                            datastring = "81 " + Common.bytesToHexString(raw_data);
                             executorService.execute(send_raw);
                         }
                     }
 
+                    nowtime2 = System.currentTimeMillis();
                     if (nowtime2 - lasttime2 > 100) {
                         if ((nowangle2 != lastangle2) | (nowspd2 != lastspd2)) {
                             lastspd2 = nowspd2;
@@ -188,6 +190,7 @@ public class Controller extends Activity {
                             raw_data = new byte[2];
                             raw_data[0] = (byte) (nowangle2 / 10);
                             raw_data[1] = (byte) (nowspd2 / 10);
+                            datastring = "82 " + Common.bytesToHexString(raw_data);
                             executorService.execute(send_raw);
                         }
                     }
@@ -201,6 +204,7 @@ public class Controller extends Activity {
 
     Runnable send_raw = new Runnable() {
         public void run() {
+            if(ser2netConnector == null)return;
             if (ser2netConnector.sendCommandData(command, raw_data)) {
                 show("发送指令成功");
             } else {
@@ -372,7 +376,7 @@ public class Controller extends Activity {
 //        send_one_byte((byte) 0xF0);
     }
 
-    String NanoPi2_IP = "192.168.1.88";
+    String NanoPi2_IP = "192.168.8.1";
     static Ser2netConnector ser2netConnector;
 
     public void connect_STM32(View v) {
@@ -445,7 +449,7 @@ public class Controller extends Activity {
 
     String showString = "";
     Toast toast;
-    String datastring;
+    public static String datastring;
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {

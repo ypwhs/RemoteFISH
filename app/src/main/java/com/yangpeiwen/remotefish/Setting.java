@@ -43,7 +43,6 @@ public class Setting extends AppCompatActivity {
                 return false;
             }
         });
-
     }
 
     public void reset_audio(View v) {

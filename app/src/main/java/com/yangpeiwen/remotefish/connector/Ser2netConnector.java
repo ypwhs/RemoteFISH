@@ -1,6 +1,7 @@
 package com.yangpeiwen.remotefish.connector;
 
 import com.yangpeiwen.remotefish.Common;
+import com.yangpeiwen.remotefish.Controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
