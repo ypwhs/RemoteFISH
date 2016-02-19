@@ -11,10 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -143,8 +139,8 @@ public class Controller extends Activity {
         joystick.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                angle = ( angle + 90) % 360;
-                joystickTextview.setText(angle + "," + power + "\n" );
+                angle = (angle + 90) % 360;
+                joystickTextview.setText(angle + "," + power + "\n");
                 nowangle = angle;
                 nowspd = power;
             }
@@ -154,8 +150,8 @@ public class Controller extends Activity {
         joystick2.setOnJoystickMoveListener(new JoystickView.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                angle = ( angle + 90) % 360;
-                joystickTextview.setText(angle + "," + power + "\n" );
+                angle = (angle + 90) % 360;
+                joystickTextview.setText(angle + "," + power + "\n");
                 nowangle2 = angle;
                 nowspd2 = power;
             }
@@ -171,7 +167,7 @@ public class Controller extends Activity {
                             lastspd = nowspd;
                             lasttime = nowtime;
                             lastangle = nowangle;
-                            command = (byte)0x81;
+                            command = (byte) 0x81;
                             raw_data = new byte[2];
                             raw_data[0] = (byte) (nowangle / 10);
                             raw_data[1] = (byte) (nowspd / 10);
@@ -186,7 +182,7 @@ public class Controller extends Activity {
                             lastspd2 = nowspd2;
                             lasttime2 = nowtime2;
                             lastangle2 = nowangle2;
-                            command = (byte)0x82;
+                            command = (byte) 0x82;
                             raw_data = new byte[2];
                             raw_data[0] = (byte) (nowangle2 / 10);
                             raw_data[1] = (byte) (nowspd2 / 10);
@@ -204,7 +200,7 @@ public class Controller extends Activity {
 
     Runnable send_raw = new Runnable() {
         public void run() {
-            if(ser2netConnector == null)return;
+            if (ser2netConnector == null) return;
             if (ser2netConnector.sendCommandData(command, raw_data)) {
                 show("发送指令成功");
             } else {
@@ -376,6 +372,7 @@ public class Controller extends Activity {
 //        send_one_byte((byte) 0xF0);
     }
 
+    //String NanoPi2_IP = "192.168.8.1";
     String NanoPi2_IP = "192.168.8.1";
     static Ser2netConnector ser2netConnector;
 
